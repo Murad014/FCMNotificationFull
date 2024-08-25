@@ -1,0 +1,35 @@
+server:
+  port: ${server.port.cn}
+
+api:
+  firebase-configuration-file: firebase-adminsdk.json
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+spring:
+  rabbitmq:
+    listener:
+      simple:
+        default-requeue-rejected: false
+  config:
+    import:
+      - "consul:"
+      - "vault:"
+  cloud:
+    consul:
+      config:
+        enabled: true
+      host: localhost
+      port: 8500
+      enabled: true
+    vault:
+      host: localhost
+      port: 8200
+      scheme: http
+      authentication: token
+      enabled: true
+      token: root

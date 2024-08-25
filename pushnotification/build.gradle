@@ -1,0 +1,81 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.3'
+	id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.pushnotification'
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+ext {
+	set('springCloudVersion', "2023.0.3")
+}
+
+dependencies {
+	//Start
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	//Actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	//Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	//Consul
+	implementation 'org.springframework.cloud:spring-cloud-starter-consul-config'
+	//Vault
+	implementation 'org.springframework.cloud:spring-cloud-starter-vault-config'
+	//Swagger
+	implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+	// Firebase admin
+	implementation group: 'com.google.firebase', name: 'firebase-admin', version: '9.1.1'
+	//DevTools
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	//spring-boot-starter-validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation:2.3.1.RELEASE'
+	//Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// mq
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	testImplementation 'org.springframework.amqp:spring-rabbit-test'
+
+	// Hibernate JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// H2 database
+	runtimeOnly 'com.h2database:h2'
+
+	// Lang3
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.16.0'
+
+	// Model Mapper
+	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.2.1'
+
+
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+tasks.withType(Jar) {
+	archiveBaseName.set('app')
+	destinationDirectory.set(file("$rootDir/build/"))
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
