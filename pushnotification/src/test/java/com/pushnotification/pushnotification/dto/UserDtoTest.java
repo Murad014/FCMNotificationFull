@@ -8,6 +8,7 @@ import com.pushnotification.pushnotification.repository.UserRepository;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,6 @@ public class UserDtoTest {
 
         UserDto userDto = new UserDto();
         userDto.setCif("1234567");
-        userDto.setUuid("sample-uuid");
         userDto.setToken("sample-token");
         userDto.setPlatformLanguage(PlatformLanguages.AZ);
         userDto.setPlatform(Platform.ANDROID); // Example value
@@ -61,7 +61,6 @@ public class UserDtoTest {
         // Arrange
         UserDto userDto = new UserDto();
         userDto.setCif(""); // Invalid: empty string
-        userDto.setUuid(null); // Optional field
         userDto.setToken(null); // Optional field
         userDto.setPlatform(null); // Invalid: null
 
@@ -112,7 +111,6 @@ public class UserDtoTest {
 
         UserDto userDto = new UserDto();
         userDto.setCif(fromDB.getCif());
-        userDto.setUuid("sample-uuid");
         userDto.setToken("sample-token2");
         userDto.setPlatform(Platform.ANDROID);
         userDto.setPlatformLanguage(PlatformLanguages.AZ);
@@ -136,14 +134,12 @@ public class UserDtoTest {
         UserDto userDtoToSave = new UserDto();
         userDtoToSave.setToken("sample-toke213123n");
         userDtoToSave.setCif("1234562");
-        userDtoToSave.setUuid("sample-uuidasdad");
         userDtoToSave.setPlatformLanguage(PlatformLanguages.AZ);
 
         var fromDB = userRepository.save(mapToUserEntity(userDtoToSave));
 
         UserDto userDto = new UserDto();
         userDto.setCif("1234526");
-        userDto.setUuid("12312412312");
         userDto.setToken(fromDB.getToken());
         userDto.setPlatform(Platform.ANDROID);
         userDto.setPlatformLanguage(PlatformLanguages.AZ);
@@ -162,16 +158,15 @@ public class UserDtoTest {
 
     @Test
     @DisplayName("Check unique UUID violation")
+    @Disabled
     public void testUniqueUUID() {
         // Arrange
         UserDto userDtoToSave = new UserDto();
-        userDtoToSave.setUuid("sample-uuidasdad");
         userDtoToSave.setPlatformLanguage(PlatformLanguages.AZ);
         var fromDB = userRepository.save(mapToUserEntity(userDtoToSave));
 
         UserDto userDto = new UserDto();
         userDto.setCif("1234526");
-        userDto.setUuid(fromDB.getUuid());
         userDto.setToken("ashdiyqiuwyduiyiy");
         userDto.setPlatform(Platform.ANDROID);
 
@@ -192,7 +187,6 @@ public class UserDtoTest {
     private UserEntity mapToUserEntity(UserDto userDto) {
         var userEntity = new UserEntity();
         userEntity.setCif(userDto.getCif());
-        userEntity.setUuid(userDto.getUuid());
         userEntity.setToken(userDto.getToken());
         userEntity.setIsActive(true);
         userEntity.setPlatformLanguage(userDto.getPlatformLanguage());

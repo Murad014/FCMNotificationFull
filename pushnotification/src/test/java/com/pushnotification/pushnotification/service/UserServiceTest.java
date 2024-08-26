@@ -5,7 +5,7 @@ import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
 import com.pushnotification.pushnotification.entity.TopicEntity;
 import com.pushnotification.pushnotification.entity.UserEntity;
-import com.pushnotification.pushnotification.exception.ResourceNotFoundException;
+import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
 import com.pushnotification.pushnotification.helper.TopicEntityCreatorHelper;
 import com.pushnotification.pushnotification.helper.UserDtoCreatorHelper;
 import com.pushnotification.pushnotification.helpers.ConverterHelper;
@@ -50,13 +50,13 @@ public class UserServiceTest {
     private UserEntity userEntity;
 
 
+
     @BeforeEach
     public void beforeEach() {
         userDto = UserDtoCreatorHelper.dto();
         userUpdateDto = UserDtoCreatorHelper.updateDto();
         userEntity = new UserEntity();
 
-        userEntity.setUuid(userDto.getUuid());
         userEntity.setCif(userDto.getCif());
         userEntity.setToken(userDto.getToken());
         userEntity.setPlatform(userDto.getPlatform());
@@ -99,7 +99,7 @@ public class UserServiceTest {
     @Test
     @Order(3)
     @DisplayName("Update User By Cif")
-    public void givenDtoAndUserCif_whenUpdate_thenReturnUserDto(){
+    public void givenDtoAndUserCif_whenUpdate_thenReturnUserDto() {
         // Arrange
         // Arrange
         userEntity.setTopics(new HashSet<>(TopicEntityCreatorHelper.entityList(10)));
@@ -139,16 +139,58 @@ public class UserServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> {
             userService.updateUser(doesNotExists, userUpdateDto);
-        }, "If there is not company in DB then should be throw exception.");
+        }, "If there is not user in DB then should be throw exception.");
     }
 
+    @Test
+    @Order(4)
+    @DisplayName("Make is Active True User by CIF that does not exist in DB")
+    public void givenCif_whenDoesNotFind_thenReturnException(){
+        // Arrange
+        final String cif = "1234567";
+        userEntity.setCif(cif);
+        userEntity.setIsActive(true);
+
+        // When
+        when(userRepository.findByCif(cif)).thenReturn(Optional.ofNullable(userEntity));
+        when(userRepository.save(userEntity)).thenReturn(userEntity);
+
+
+        // When Throw
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userService.deleteByCIF("1312322");
+        }, "If there is not user in DB then should be throw exception.");
+
+        // Verify
+        verify(userRepository, times(1)).findByCif("1312322");
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("Make Is Active False User by CIF")
+    public void givenCif_whenSave_thenReturnNothing(){
+        // Arrange
+        final String cif = "1234567";
+        userEntity.setCif(cif);
+        userEntity.setIsActive(true);
+
+        // When
+        when(userRepository.findByCif(cif)).thenReturn(Optional.ofNullable(userEntity));
+        when(userRepository.save(userEntity)).thenReturn(userEntity);
+
+
+        // Act
+        userService.deleteByCIF(cif);
+
+        // Verify
+        verify(userRepository, times(1)).findByCif(cif);
+    }
 
 
     private void customerAssertionsForCreate(UserEntity expected, UserDto actual){
         assertNotNull(actual);
 
         assertEquals(expected.getCif(), actual.getCif());
-        assertEquals(expected.getUuid(), actual.getUuid());
         assertEquals(expected.getToken(), actual.getToken());
         assertEquals(expected.getPlatform(), actual.getPlatform());
         assertEquals(expected.getPlatformLanguage(), actual.getPlatformLanguage());

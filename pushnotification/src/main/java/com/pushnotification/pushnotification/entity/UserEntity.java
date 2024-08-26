@@ -9,11 +9,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Where;
 
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Table(name = "users")
 @Entity
@@ -21,7 +23,7 @@ import java.util.Set;
 @Setter
 @ToString(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Where(clause = "is_active = true")
+@SQLRestriction("is_active = true")
 public class UserEntity extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +37,7 @@ public class UserEntity extends BaseEntity{
             inverseJoinColumns = @JoinColumn(name = "topic_id"))
     Set<TopicEntity> topics = new HashSet<>();
 
-    String uuid;
+    String uuid = UUID.randomUUID().toString();
     String token;
     Platform platform;
 

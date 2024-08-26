@@ -5,7 +5,6 @@ import com.pushnotification.pushnotification.constant.Platform;
 import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.customvalidations.UniqueCif;
 import com.pushnotification.pushnotification.customvalidations.UniqueToken;
-import com.pushnotification.pushnotification.customvalidations.UniqueUUID;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -26,11 +25,6 @@ public class UserDto {
             @UniqueCif
     String cif;
 
-    @Valid
-            @NotBlank
-            @NotNull
-            @UniqueUUID
-    String uuid;
 
     @Valid
             @NotBlank

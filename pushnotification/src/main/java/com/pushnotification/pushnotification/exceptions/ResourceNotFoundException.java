@@ -1,4 +1,4 @@
-package com.pushnotification.pushnotification.exception;
+package com.pushnotification.pushnotification.exceptions;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

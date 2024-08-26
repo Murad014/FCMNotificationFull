@@ -125,7 +125,6 @@ public class TopicRepositoryTest {
 
 
 
-
     private void assertions(TopicEntity expected, TopicEntity actual){
         assertNotNull(actual);
         assertEquals(expected.getName(), actual.getName());

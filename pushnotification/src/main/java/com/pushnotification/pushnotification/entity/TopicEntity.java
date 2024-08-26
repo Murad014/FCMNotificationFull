@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Where;
 
 
@@ -19,7 +20,7 @@ import java.util.Set;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Filter(name = "activeFilter", condition = ":isActive = is_active")
+@SQLRestriction("is_active = true")
 public class TopicEntity extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +30,9 @@ public class TopicEntity extends BaseEntity{
 
     String description;
 
+    String language = "AZ";
+
     @ManyToMany
-    @Where(clause = "is_active = true")
+    @Filter(name = "activeFilter", condition = ":isActive = is_active")
     Set<UserEntity> users = new HashSet<>();
 }

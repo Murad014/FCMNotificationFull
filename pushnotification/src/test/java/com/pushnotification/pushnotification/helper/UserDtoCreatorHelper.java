@@ -13,7 +13,6 @@ public class UserDtoCreatorHelper {
     public static UserDto dto() {
         UserDto userDto = new UserDto();
         userDto.setCif(RandomStringUtils.randomNumeric(7));
-        userDto.setUuid(UUID.randomUUID().toString());
         userDto.setPlatform(RandomGeneratorHelper.randomBoolean() ? Platform.IOS : Platform.ANDROID);
         userDto.setPlatformLanguage(PlatformLanguages.AZ);
         userDto.setToken(RandomStringUtils.randomAlphanumeric(80));

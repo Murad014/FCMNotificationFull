@@ -4,13 +4,14 @@ import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
 import com.pushnotification.pushnotification.entity.TopicEntity;
 import com.pushnotification.pushnotification.entity.UserEntity;
-import com.pushnotification.pushnotification.exception.ResourceNotFoundException;
+import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
 import com.pushnotification.pushnotification.helpers.ConverterHelper;
 import com.pushnotification.pushnotification.mapping.UserMapping;
 import com.pushnotification.pushnotification.repository.TopicRepository;
 import com.pushnotification.pushnotification.repository.UserRepository;
 import com.pushnotification.pushnotification.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.metrics.data.RepositoryMetricsAutoConfiguration;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -71,6 +72,18 @@ public class UsersServiceImpl implements UserService {
         return  userMapping.toUserUpdateDto(userRepository.save(findByCif));
 
     }
+
+    @Override
+    public void deleteByCIF(String cif) {
+        var findByCif = userRepository.findByCif(cif).orElseThrow(
+                () -> new ResourceNotFoundException("User", "cif", cif)
+        );
+
+        findByCif.setIsActive(false);
+
+        userRepository.save(findByCif);
+    }
+
 
     private void checkAllTopicsExistsInDBIfNotThenThrowException(Set<TopicEntity> topicsFromDB,
                                                                        Set<String> topicsFromClient) {

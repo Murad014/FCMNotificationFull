@@ -76,9 +76,7 @@ public class UserController {
         responseDto.setPath(SELF_MAIN_LINK.concat("/").concat(cif));
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
-
     }
-
 
 
     @GetMapping

@@ -7,5 +7,5 @@ import com.pushnotification.pushnotification.dto.UserUpdateDto;
 public interface UserService {
     UserDto createUser(UserDto userDto);
     UserUpdateDto updateUser(String cif, UserUpdateDto userDto);
-
+    void deleteByCIF(String cif);
 }

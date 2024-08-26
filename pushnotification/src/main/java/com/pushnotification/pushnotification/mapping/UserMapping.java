@@ -13,7 +13,6 @@ public class UserMapping {
     public UserDto toUserDto(UserEntity userEntity) {
         var userDto = new UserDto();
         userDto.setCif(userDto.getCif());
-        userDto.setUuid(userEntity.getUuid());
         userDto.setToken(userEntity.getToken());
         userDto.setPlatform(userEntity.getPlatform());
         userDto.setTopics(new HashSet<>());
