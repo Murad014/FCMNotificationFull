@@ -1,10 +1,8 @@
 package com.pushnotification.pushnotification.customvalidations.impl;
 
-import com.google.storage.v2.StorageProto;
-import com.pushnotification.pushnotification.customvalidations.UniqueToken;
+import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.customvalidations.UniqueTopicName;
 import com.pushnotification.pushnotification.repository.TopicRepository;
-import com.pushnotification.pushnotification.repository.UserRepository;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -16,7 +14,6 @@ public class UniqueTopicNameValidator implements ConstraintValidator<UniqueTopic
         this.topicRepository = topicRepository;
     }
 
-
     @Override
     public void initialize(UniqueTopicName constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
@@ -24,7 +21,10 @@ public class UniqueTopicNameValidator implements ConstraintValidator<UniqueTopic
 
     @Override
     public boolean isValid(String topicName, ConstraintValidatorContext context) {
-        boolean existTopicName = topicRepository.existsByName(topicName);
+        boolean existTopicName = false;
+        for(var lang: PlatformLanguages.values())
+            existTopicName |= topicRepository.existsByName(topicName.concat("_" + lang.toString().toLowerCase()));
+
         return !existTopicName;
     }
 }

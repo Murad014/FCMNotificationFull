@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
-    private final String mainPath = "/api/v1/users";
+    private static final String MAIN_PATH = "/api/v1/users";
     private final UserService userService;
     private final GenerateResponseHelper generateResponseHelper;
 
@@ -28,21 +28,24 @@ public class UserController {
     @PostMapping
     public ResponseEntity<ResponseDto<UserDto>> createUser(@Valid @RequestBody UserDto userDto) {
         UserDto createdUser = userService.createUser(userDto);
-        var response = generateResponseHelper.generateResponse(201, "user.created.message",
-                createdUser, mainPath);
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return buildResponse(HttpStatus.CREATED, "user.created.message",
+                createdUser, MAIN_PATH);
     }
 
     @PutMapping("/{cif}")
     public ResponseEntity<ResponseDto<UserUpdateDto>> updateUser(@PathVariable("cif") String cif,
                                                                  @Valid @RequestBody UserUpdateDto userDto) {
         UserUpdateDto updatedUser = userService.updateUser(cif, userDto);
-        var response = generateResponseHelper.generateResponse(200, "user.update.message",
-                updatedUser, mainPath.concat("/").concat(cif));
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return buildResponse(HttpStatus.OK, "user.update.message",
+                updatedUser, MAIN_PATH.concat("/").concat(cif));
     }
 
 
+    private <D> ResponseEntity<ResponseDto<D>> buildResponse(HttpStatus status, String messageKey,
+                                                             D data, String path) {
+        var response = generateResponseHelper.generateResponse(status.value(), messageKey, data, path);
+        return new ResponseEntity<>(response, status);
+    }
 }
