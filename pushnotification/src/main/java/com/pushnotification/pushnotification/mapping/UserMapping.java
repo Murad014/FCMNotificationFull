@@ -27,7 +27,6 @@ public class UserMapping {
 
     public UserUpdateDto toUserUpdateDto(UserEntity userEntity) {
         var userUpdateDto = new UserUpdateDto();
-        userUpdateDto.setUuid(userEntity.getUuid());
         userUpdateDto.setToken(userEntity.getToken());
         userUpdateDto.setPlatform(userEntity.getPlatform());
         userUpdateDto.setTopics(new HashSet<>());

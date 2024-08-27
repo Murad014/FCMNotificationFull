@@ -14,8 +14,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-
 import java.util.List;
 
 
@@ -24,7 +22,6 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final UserRepository userRepository;
 
     private static final int CREATE_STATUS_CODE = 201;
     private static final int OK_STATUS_CODE = 200;
@@ -33,9 +30,8 @@ public class UserController {
 
 
     @Autowired
-    public UserController(UserService userService, UserRepository userRepository, MessageSource messageSource) {
+    public UserController(UserService userService, MessageSource messageSource) {
         this.userService = userService;
-        this.userRepository = userRepository;
         this.messageSource = messageSource;
     }
 
@@ -78,10 +74,5 @@ public class UserController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-
-    @GetMapping
-    public ResponseEntity<List<UserEntity>> getUsers() {
-        return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);
-    }
 
 }

@@ -156,33 +156,6 @@ public class UserDtoTest {
 
     }
 
-    @Test
-    @DisplayName("Check unique UUID violation")
-    @Disabled
-    public void testUniqueUUID() {
-        // Arrange
-        UserDto userDtoToSave = new UserDto();
-        userDtoToSave.setPlatformLanguage(PlatformLanguages.AZ);
-        var fromDB = userRepository.save(mapToUserEntity(userDtoToSave));
-
-        UserDto userDto = new UserDto();
-        userDto.setCif("1234526");
-        userDto.setToken("ashdiyqiuwyduiyiy");
-        userDto.setPlatform(Platform.ANDROID);
-
-        // Act
-        var violations = validator.validate(userDto);
-
-        // Assert
-        assertFalse(violations.isEmpty(), "UserDto should have validation errors");
-        var uuidViolation = violations.stream()
-                .anyMatch(violation -> violation.getPropertyPath().toString().equals("uuid"));
-        assertTrue(uuidViolation, "UUID field should have validation error for unique violation");
-
-    }
-
-
-
 
     private UserEntity mapToUserEntity(UserDto userDto) {
         var userEntity = new UserEntity();
