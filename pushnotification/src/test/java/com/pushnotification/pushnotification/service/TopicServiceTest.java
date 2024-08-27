@@ -5,12 +5,12 @@ import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.dto.TopicDto;
 import com.pushnotification.pushnotification.entity.TopicEntity;
 import com.pushnotification.pushnotification.helper.TopicEntityCreatorHelper;
-import com.pushnotification.pushnotification.helpers.ConverterHelper;
 import com.pushnotification.pushnotification.repository.TopicRepository;
 import com.pushnotification.pushnotification.service.impl.TopicServiceImpl;
 import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -28,7 +28,8 @@ public class TopicServiceTest {
     @Mock
     private TopicRepository topicRepository;
     @Mock
-    private ConverterHelper converterHelper;
+    private ModelMapper modelMapper;
+
     @InjectMocks
     private TopicServiceImpl topicService;
 
@@ -51,16 +52,16 @@ public class TopicServiceTest {
     public void givenDto_whenSave_returnEntity(){
         topicDto.setName(topicEntity.getName().concat("_az"));
         // When
-        when(converterHelper.mapToEntity(topicDto, TopicEntity.class)).thenReturn(topicEntity);
+        when(modelMapper.map(topicDto, TopicEntity.class)).thenReturn(topicEntity);
         when(topicRepository.save(topicEntity)).thenReturn(topicEntity);
-        when(converterHelper.mapToDto(topicEntity, TopicDto.class)).thenReturn(topicDto);
+        when(modelMapper.map(topicEntity, TopicDto.class)).thenReturn(topicDto);
 
         // Act
         var saved = topicService.createTopic(topicDto);
 
         // Verify
         verify(topicRepository, times(3)).save(topicEntity);
-        verify(converterHelper, times(3)).mapToEntity(topicDto, TopicEntity.class);
+        verify(modelMapper, times(3)).map(topicDto, TopicEntity.class);
 
         // Assert
         assertNotNull(saved);
@@ -100,15 +101,15 @@ public class TopicServiceTest {
     public void givenTopics_whenFetchAllTopics_thenReturnTopicDtos() {
         // Mocking
         when(topicRepository.findAll()).thenReturn(List.of(topicEntities.get(0), topicEntities.get(1)));
-        when(converterHelper.mapToDto(topicEntities.get(0), TopicDto.class)).thenReturn(dtoList.get(1));
-        when(converterHelper.mapToDto(topicEntities.get(1), TopicDto.class)).thenReturn(dtoList.get(1));
+        when(modelMapper.map(topicEntities.get(0), TopicDto.class)).thenReturn(dtoList.get(1));
+        when(modelMapper.map(topicEntities.get(1), TopicDto.class)).thenReturn(dtoList.get(1));
 
         // Act
         Set<TopicDto> result = topicService.fetchAllTopics();
 
         // Verify
         verify(topicRepository, times(1)).findAll();
-        verify(converterHelper, times(2)).mapToDto(any(), any());
+        verify(modelMapper, times(2)).map(any(), any());
 
     }
 

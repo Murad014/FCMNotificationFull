@@ -3,16 +3,12 @@ package com.pushnotification.pushnotification.service.impl;
 import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.dto.TopicDto;
 import com.pushnotification.pushnotification.entity.TopicEntity;
-import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
-import com.pushnotification.pushnotification.helpers.ConverterHelper;
 import com.pushnotification.pushnotification.repository.TopicRepository;
-import com.pushnotification.pushnotification.repository.UserRepository;
 import com.pushnotification.pushnotification.service.TopicService;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,11 +18,11 @@ import java.util.stream.Collectors;
 public class TopicServiceImpl implements TopicService {
 
     private final TopicRepository topicRepository;
-    private final ConverterHelper converterHelper;
+    private final ModelMapper modelMapper;
 
-    public TopicServiceImpl(TopicRepository topicRepository, ConverterHelper converterHelper) {
+    public TopicServiceImpl(TopicRepository topicRepository, ModelMapper modelMapper) {
         this.topicRepository = topicRepository;
-        this.converterHelper = converterHelper;
+        this.modelMapper = modelMapper;
     }
 
 
@@ -38,7 +34,7 @@ public class TopicServiceImpl implements TopicService {
                     .getName()
                     .concat("_")
                     .concat(lang.toString().toLowerCase());
-            var convertToEntity = converterHelper.mapToEntity(topicDto, TopicEntity.class);
+            var convertToEntity = modelMapper.map(topicDto, TopicEntity.class);
 
             convertToEntity.setName(topicNameWithLang);
             topicRepository.save(convertToEntity);
@@ -66,7 +62,7 @@ public class TopicServiceImpl implements TopicService {
         return topicRepository
                 .findAll()
                 .stream()
-                .map(topicEntity -> converterHelper.mapToDto(topicEntity, TopicDto.class))
+                .map(topicEntity -> modelMapper.map(topicEntity, TopicDto.class))
                 .collect(Collectors.toSet());
     }
 
