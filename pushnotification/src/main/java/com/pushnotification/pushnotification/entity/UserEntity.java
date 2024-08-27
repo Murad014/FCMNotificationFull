@@ -39,8 +39,10 @@ public class UserEntity extends BaseEntity{
 
     String uuid = UUID.randomUUID().toString();
     String token;
+    @Enumerated(EnumType.STRING)
     Platform platform;
 
     @Column(name = "platform_language", nullable = false)
+    @Enumerated(EnumType.STRING)
     PlatformLanguages platformLanguage;
 }

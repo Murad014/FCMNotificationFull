@@ -63,7 +63,6 @@ public class UserMappingTest {
         UserUpdateDto userUpdateDto = userMapping.toUserUpdateDto(userEntity);
 
         assertNotNull(userUpdateDto);
-        assertEquals(userEntity.getUuid(), userUpdateDto.getUuid());
         assertEquals(userEntity.getToken(), userUpdateDto.getToken());
         assertEquals(userEntity.getPlatform(), userUpdateDto.getPlatform());
         assertEquals(userEntity.getPlatformLanguage(), userUpdateDto.getPlatformLanguage());

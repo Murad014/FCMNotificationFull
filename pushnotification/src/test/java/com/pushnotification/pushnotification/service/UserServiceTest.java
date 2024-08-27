@@ -1,6 +1,7 @@
 package com.pushnotification.pushnotification.service;
 
 
+import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
 import com.pushnotification.pushnotification.entity.TopicEntity;
@@ -19,10 +20,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,13 +71,23 @@ public class UserServiceTest {
                 .stream()
                 .map(TopicEntity::getName)
                 .collect(Collectors.toSet());
-        userDto.setTopics(topicList);
+
+        var expandLangList = expandLanguages(topicList, userDto.getPlatformLanguage());
+        Set<TopicEntity> tt = new HashSet<>();
+        expandLangList.forEach(expandLang -> {
+            var t = new TopicEntity();
+            t.setName(expandLang);
+            tt.add(t);
+
+        });
+        userEntity.setTopics(tt);
+
 
         // When
         when(converter.mapToEntity(userDto, UserEntity.class))
                 .thenReturn(userEntity);
         when(userRepository.save(userEntity)).thenReturn(userEntity);
-        when(topicRepository.findAllByNameIn(new ArrayList<>(topicList)))
+        when(topicRepository.findAllByNameIn(expandLangList))
                 .thenReturn(userEntity.getTopics());
         when(userMapping.toUserDto(userEntity)).thenReturn(userDto);
 
@@ -119,7 +127,7 @@ public class UserServiceTest {
                 .thenReturn(userUpdateDto);
         when(userRepository.save(userEntity))
                 .thenReturn(userEntity);
-        when(topicRepository.findAllByNameIn(new ArrayList<>(topicList)))
+        when(topicRepository.findAllByNameIn(anyList()))
                 .thenReturn(userEntity.getTopics());
 
         // Act
@@ -202,10 +210,19 @@ public class UserServiceTest {
     private void customAssertionForUpdate(UserEntity expected, UserUpdateDto actual){
         assertNotNull(actual);
 
-        assertEquals(expected.getUuid(), actual.getUuid());
         assertEquals(expected.getToken(), actual.getToken());
         assertEquals(expected.getPlatform(), actual.getPlatform());
         assertEquals(expected.getPlatformLanguage(), actual.getPlatformLanguage());
+    }
+
+    // topics: news => news_az (az device app lang)
+    private List<String> expandLanguages(Set<String> languages, PlatformLanguages platformLanguage){
+        var list = new ArrayList<String>();
+        languages.forEach(language -> {
+            list.add(language.concat("_"+platformLanguage.toString().toLowerCase()));
+        });
+
+        return list;
     }
 
 }

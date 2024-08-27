@@ -22,7 +22,6 @@ public class UserDtoCreatorHelper {
 
     public static UserUpdateDto updateDto() {
         UserUpdateDto userDto = new UserUpdateDto();
-        userDto.setUuid(UUID.randomUUID().toString());
         userDto.setPlatform(RandomGeneratorHelper.randomBoolean() ? Platform.IOS : Platform.ANDROID);
         userDto.setPlatformLanguage(PlatformLanguages.AZ);
         userDto.setToken(RandomStringUtils.randomAlphanumeric(80));

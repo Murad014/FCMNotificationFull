@@ -22,11 +22,6 @@ public class UserUpdateDto {
     @Valid
     @NotBlank
     @NotNull
-    String uuid;
-
-    @Valid
-    @NotBlank
-    @NotNull
     String token;
 
     @Valid

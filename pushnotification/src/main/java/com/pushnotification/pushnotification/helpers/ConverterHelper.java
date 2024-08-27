@@ -12,7 +12,6 @@ public class ConverterHelper {
     @Autowired
     public ConverterHelper(ModelMapper modelMapper){
         this.modelMapper = modelMapper;
-//        configureMapper();
     }
 
     public <D, E> E mapToEntity(D dto, Class<E> entity){
