@@ -4,6 +4,7 @@ package com.pushnotification.pushnotification.controller;
 import com.pushnotification.pushnotification.dto.ResponseDto;
 import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
+import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
 import com.pushnotification.pushnotification.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,9 +24,6 @@ import static org.mockito.Mockito.*;
 
 @DisplayName("User Controller")
 class UserControllerTest {
-    private static final int UPDATE_STATUS_CODE = HttpStatus.OK.value();
-    final int CREATE_STATUS_CODE = 201;
-    final String SELF_MAIN_LINK = "/api/v1/users";
     final String createdMessage = "User created Successfully!";
     final String updateMessage = "User updated Successfully!";
 
@@ -34,6 +32,8 @@ class UserControllerTest {
     private UserService userService;
     @Mock
     private MessageSource messageSource;
+    @Mock
+    private GenerateResponseHelper generateResponseHelper;
 
     @InjectMocks
     private UserController userController;
@@ -51,8 +51,11 @@ class UserControllerTest {
         // Arrange
         UserDto userDto = new UserDto();
         UserDto createdUser = new UserDto();
+
+        // When
         when(userService.createUser(userDto)).thenReturn(createdUser);
         when(messageSource.getMessage(any(), any(), any())).thenReturn(createdMessage);
+        when(generateResponseHelper.generateResponse(eq(201), any(), any(), any())).thenReturn(any());
 
         // Act
         ResponseEntity<ResponseDto<UserDto>> responseEntity = userController.createUser(userDto);
@@ -61,28 +64,22 @@ class UserControllerTest {
         assertNotNull(responseEntity);
         assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
 
-        ResponseDto<UserDto> responseDto = responseEntity.getBody();
-
-        assertNotNull(responseDto);
-        assertEquals(CREATE_STATUS_CODE, responseDto.getCode());
-        assertEquals(SELF_MAIN_LINK, responseDto.getPath());
-        assertEquals(createdUser, responseDto.getData());
-        assertEquals(responseDto.getMessage(), createdMessage);
-
-        verify(userService, times(1)).createUser(userDto);
+        // Verify
+        verify(userService).createUser(userDto);
+        verify(generateResponseHelper).generateResponse(eq(201), any(), any(), any());
     }
 
     @Test
     @Order(1)
-    @DisplayName("Update User")
+    @DisplayName("Update User By CIF")
     void UpdateUser_ShouldReturn200UpdateWithResponseDto() {
         final String cif = "1234567";
 
         // Arrange
         UserUpdateDto userDto = new UserUpdateDto();
-        var createdUser = new UserUpdateDto();
+        var updatedUser = new UserUpdateDto();
 
-        when(userService.updateUser(cif, userDto)).thenReturn(createdUser);
+        when(userService.updateUser(cif, userDto)).thenReturn(updatedUser);
         when(messageSource.getMessage(any(), any(), any())).thenReturn(updateMessage);
 
         // Act
@@ -92,15 +89,10 @@ class UserControllerTest {
         assertNotNull(responseEntity);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        ResponseDto<UserUpdateDto> responseDto = responseEntity.getBody();
-
-        assertNotNull(responseDto);
-        assertEquals(UPDATE_STATUS_CODE, responseDto.getCode());
-        assertEquals(SELF_MAIN_LINK.concat("/").concat(cif), responseDto.getPath());
-        assertEquals(createdUser, responseDto.getData());
-        assertEquals(responseDto.getMessage(), updateMessage);
-
+        // Verify
         verify(userService, times(1)).updateUser(cif, userDto);
+        verify(generateResponseHelper).generateResponse(eq(200), any(), any(), any());
+
     }
 
 

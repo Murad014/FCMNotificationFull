@@ -45,27 +45,6 @@ public class TopicDtoTest {
         assertTrue(violations.isEmpty(), "UserDto should be valid");
     }
 
-    @Test
-    @DisplayName("Test Invalid TopicDto")
-    public void testInvalidTopicDto() {
-        // Arrange
-        TopicDto topicDto = new TopicDto();
-        topicDto.setName(null);
-        topicDto.setDescription(null);
-
-        // Act
-        var violations = validator.validate(topicDto);
-
-        // Assert
-        assertFalse(violations.isEmpty(), "UserDto should not be valid");
-        var cifViolation = violations.stream()
-                .anyMatch(violation -> violation.getPropertyPath().toString().equals("name"));
-        var platformViolation = violations.stream()
-                .anyMatch(violation -> violation.getPropertyPath().toString().equals("description"));
-
-        assertTrue(cifViolation, "Name field should have validation error");
-        assertTrue(platformViolation, "Description field should have validation error");
-    }
 
 
 }

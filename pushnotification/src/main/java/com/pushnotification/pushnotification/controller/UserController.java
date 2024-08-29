@@ -6,10 +6,13 @@ import com.pushnotification.pushnotification.dto.UserUpdateDto;
 import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
 import com.pushnotification.pushnotification.service.UserService;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 
 @RestController
@@ -40,6 +43,14 @@ public class UserController {
 
         return buildResponse(HttpStatus.OK, "user.update.message",
                 updatedUser, MAIN_PATH.concat("/").concat(cif));
+    }
+
+    @PutMapping("/{cif}/topics")
+    public ResponseEntity<ResponseDto<UserUpdateDto>> setTopics(@PathVariable("cif") String cif,
+                                                                @RequestBody Set<String> topics){
+
+        System.out.println("Test: " + topics.toString());
+        return null;
     }
 
 
