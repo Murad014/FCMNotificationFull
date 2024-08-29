@@ -14,7 +14,7 @@ public class MessageConfig {
     public MessageSource messageSource() {
         var messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setBasename("classpath:languages/messages");
-        messageSource.setDefaultLocale(Locale.forLanguageTag("ru"));
+        messageSource.setDefaultLocale(Locale.forLanguageTag("en"));
         messageSource.setDefaultEncoding("UTF-8");
 
         return messageSource;

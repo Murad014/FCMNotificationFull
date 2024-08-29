@@ -20,7 +20,7 @@ public class TopicDto {
     @Valid
     @NotNull(message="Topic name cannot be null")
     @NotBlank(message="Topic name cannot be empty")
-    @UniqueTopicName
+    @UniqueTopicName(message="{topic.exists}")
     String name;
 
     @Valid
