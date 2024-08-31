@@ -1,14 +1,15 @@
 package com.pushnotification.pushnotification.entity;
 
 
+import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
 
 
 import java.util.HashSet;
@@ -30,9 +31,15 @@ public class TopicEntity extends BaseEntity{
 
     String description;
 
-    String language = "AZ";
+    @Enumerated(EnumType.STRING)
+    PlatformLanguages language = PlatformLanguages.AZ;
 
     @ManyToMany
     @Filter(name = "activeFilter", condition = ":isActive = is_active")
     Set<UserEntity> users = new HashSet<>();
+
+    @PrePersist
+    public void prePersist() {
+        this.name = this.name.toUpperCase();
+    }
 }

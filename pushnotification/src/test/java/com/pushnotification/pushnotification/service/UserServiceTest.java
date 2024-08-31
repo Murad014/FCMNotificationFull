@@ -4,13 +4,18 @@ import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
 import com.pushnotification.pushnotification.entity.UserEntity;
 import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
+import com.pushnotification.pushnotification.helper.TopicEntityCreatorHelper;
 import com.pushnotification.pushnotification.helper.UserDtoCreatorHelper;
+import com.pushnotification.pushnotification.helper.UserEntityCreatorHelper;
+import com.pushnotification.pushnotification.repository.TopicRepository;
 import com.pushnotification.pushnotification.repository.UserRepository;
+import com.pushnotification.pushnotification.service.impl.TopicServiceImpl;
 import com.pushnotification.pushnotification.service.impl.UsersServiceImpl;
 import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -27,6 +32,10 @@ public class UserServiceTest {
     private UserRepository userRepository;
     @Mock
     private ModelMapper modelMapper;
+    @Mock
+    private TopicRepository topicRepository;
+    @Mock
+    private TopicServiceImpl topicServiceImpl;
 
     @InjectMocks
     private UsersServiceImpl userService;
@@ -35,6 +44,8 @@ public class UserServiceTest {
     private UserDto userDto;
     private UserUpdateDto userUpdateDto;
     private UserEntity userEntity;
+
+
 
 
     @BeforeEach
@@ -152,6 +163,49 @@ public class UserServiceTest {
         // Verify
         verify(userRepository, times(1)).findByCif(cif);
         verify(userRepository, times(0)).save(userEntity);
+    }
+
+    @Test
+    @DisplayName("Set User's topics by CIF")
+    void testSetTopicsByUserCif_UserExists_TopicsValid() {
+        // Arrange
+        var topicEntity = UserEntityCreatorHelper.entity();
+        var topics = new HashSet<String>();
+        topics.add("Topic1");
+        topics.add("Topic2");
+
+        // When
+        when(userRepository.findByCif(topicEntity.getCif())).thenReturn(Optional.of(topicEntity));
+        when(topicServiceImpl.findAllTopicsInGivenTopicList(topics)).thenReturn(
+                new HashSet<>(TopicEntityCreatorHelper.entityList(2))
+        );
+        when(userRepository.save(userEntity)).thenReturn(userEntity);
+        doNothing().when(topicServiceImpl).checkAllGivenTopicsInDB(anySet(), anySet());
+
+        // Act
+        userService.setTopicsByUserCif(topicEntity.getCif(), topics);
+
+        // Verify
+        verify(userRepository, times(1)).findByCif(topicEntity.getCif());
+        verify(topicServiceImpl, times(1)).findAllTopicsInGivenTopicList(anySet());
+        verify(topicServiceImpl, times(1)).checkAllGivenTopicsInDB(anySet(), anySet());
+        verify(userRepository, times(1)).save(topicEntity);
+    }
+
+    @Test
+    void testSetTopicsByUserCif_UserNotFound_ThrowsException() {
+        // Arrange
+        String cif = "123456";
+        Set<String> topics = new HashSet<>();
+        topics.add("Topic1");
+        topics.add("Topic2");
+
+        when(userRepository.findByCif(cif)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userService.setTopicsByUserCif(cif, topics);
+        });
     }
 
 

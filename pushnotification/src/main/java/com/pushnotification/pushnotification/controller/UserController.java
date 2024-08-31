@@ -3,15 +3,18 @@ package com.pushnotification.pushnotification.controller;
 import com.pushnotification.pushnotification.dto.ResponseDto;
 import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
+import com.pushnotification.pushnotification.entity.UserEntity;
 import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
+import com.pushnotification.pushnotification.repository.UserRepository;
 import com.pushnotification.pushnotification.service.UserService;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -21,6 +24,7 @@ public class UserController {
     private static final String MAIN_PATH = "/api/v1/users";
     private final UserService userService;
     private final GenerateResponseHelper generateResponseHelper;
+
 
     @Autowired
     public UserController(UserService userService, GenerateResponseHelper generateResponseHelper) {
@@ -41,18 +45,18 @@ public class UserController {
                                                                  @Valid @RequestBody UserUpdateDto userDto) {
         UserUpdateDto updatedUser = userService.updateUser(cif, userDto);
 
-        return buildResponse(HttpStatus.OK, "user.update.message",
+        return buildResponse(HttpStatus.OK, "user.updated.message",
                 updatedUser, MAIN_PATH.concat("/").concat(cif));
     }
 
     @PutMapping("/{cif}/topics")
-    public ResponseEntity<ResponseDto<UserUpdateDto>> setTopics(@PathVariable("cif") String cif,
-                                                                @RequestBody Set<String> topics){
+    public ResponseEntity<ResponseDto<UserUpdateDto>> setTopicsByUserCif(@PathVariable("cif") String cif,
+                                                                @RequestBody Map<String, Set<String>> requestBody) {
+        userService.setTopicsByUserCif(cif, requestBody.get("topics"));
 
-        System.out.println("Test: " + topics.toString());
-        return null;
+        return buildResponse(HttpStatus.OK, "user.topics.set.successfully",
+                null, MAIN_PATH.concat("/").concat(cif).concat("/topics"));
     }
-
 
     private <D> ResponseEntity<ResponseDto<D>> buildResponse(HttpStatus status, String messageKey,
                                                              D data, String path) {

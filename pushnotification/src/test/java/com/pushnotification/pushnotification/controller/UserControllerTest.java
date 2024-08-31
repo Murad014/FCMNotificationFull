@@ -4,6 +4,7 @@ package com.pushnotification.pushnotification.controller;
 import com.pushnotification.pushnotification.dto.ResponseDto;
 import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
+import com.pushnotification.pushnotification.helper.UserDtoCreatorHelper;
 import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
 import com.pushnotification.pushnotification.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,13 +13,16 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
@@ -92,7 +96,44 @@ class UserControllerTest {
         // Verify
         verify(userService, times(1)).updateUser(cif, userDto);
         verify(generateResponseHelper).generateResponse(eq(200), any(), any(), any());
+    }
 
+    @Test
+    void testSetTopicsByUserCif() {
+        // Arrange
+        UserDto userDto = UserDtoCreatorHelper.dto();
+        var updatedCIF = "1212314";
+        var topics = new HashSet<>(List.of("Topic1"));
+        var mockResponseDto = new ResponseDto<>();
+        mockResponseDto.setCode(HttpStatus.OK.value());
+        mockResponseDto.setMessage("user.topics.set.successfully");
+        mockResponseDto.setData(null);
+        mockResponseDto.setPath("/api/v1/users/1212314/topics");
+
+        Map<String, Set<String>> controllerInput = new HashMap<>();
+        controllerInput.put("topics", topics);
+
+        // When
+        doNothing().when(userService).setTopicsByUserCif(eq(updatedCIF), eq(topics));
+        when(generateResponseHelper.generateResponse(Mockito.anyInt(), Mockito.anyString(), Mockito.any(), Mockito.anyString()))
+                .thenReturn(mockResponseDto);
+
+        // Act
+        var response = userController.setTopicsByUserCif(updatedCIF, controllerInput);
+
+        // Verify
+        verify(userService, times(1)).setTopicsByUserCif(updatedCIF, topics);
+        verify(generateResponseHelper, times(1))
+                .generateResponse(Mockito.eq(HttpStatus.OK.value()),
+                        Mockito.eq("user.topics.set.successfully"),
+                        Mockito.eq(null), Mockito.eq("/api/v1/users/1212314/topics"));
+
+        // Assert
+        assertNotNull(response.getBody(), "Response body should not be null");
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("user.topics.set.successfully", response.getBody().getMessage());
+        assertEquals("/api/v1/users/1212314/topics", response.getBody().getPath());
+        assertEquals(null, response.getBody().getData());
     }
 
 

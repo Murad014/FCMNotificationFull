@@ -23,7 +23,7 @@ public class UniqueTopicNameValidator implements ConstraintValidator<UniqueTopic
     public boolean isValid(String topicName, ConstraintValidatorContext context) {
         boolean existTopicName = false;
         for(var lang: PlatformLanguages.values())
-            existTopicName |= topicRepository.existsByName(topicName.concat("_" + lang.toString().toLowerCase()));
+            existTopicName |= topicRepository.existsByName(topicName.toUpperCase().concat("_" + lang.toString()));
 
         return !existTopicName;
     }

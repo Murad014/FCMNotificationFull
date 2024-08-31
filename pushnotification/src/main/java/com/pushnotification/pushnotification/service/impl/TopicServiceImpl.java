@@ -3,12 +3,14 @@ package com.pushnotification.pushnotification.service.impl;
 import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.dto.TopicDto;
 import com.pushnotification.pushnotification.entity.TopicEntity;
+import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
 import com.pushnotification.pushnotification.repository.TopicRepository;
 import com.pushnotification.pushnotification.service.TopicService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,7 +35,7 @@ public class TopicServiceImpl implements TopicService {
             final var topicNameWithLang = topicDto
                     .getName()
                     .concat("_")
-                    .concat(lang.toString().toLowerCase());
+                    .concat(lang.toString());
             var convertToEntity = modelMapper.map(topicDto, TopicEntity.class);
 
             convertToEntity.setName(topicNameWithLang);
@@ -46,7 +48,7 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public void deleteTopic(String name) {
         for(var lang: PlatformLanguages.values()) {
-            final var topicNameWithLang = name.concat("_").concat(lang.toString().toLowerCase());
+            final var topicNameWithLang = name.concat("_").concat(lang.toString());
             var findByTopicName = topicRepository.findByName(topicNameWithLang).orElse(null);
             if(findByTopicName != null) {
                 findByTopicName.setIsActive(false);
@@ -64,6 +66,25 @@ public class TopicServiceImpl implements TopicService {
                 .stream()
                 .map(topicEntity -> modelMapper.map(topicEntity, TopicDto.class))
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<TopicEntity> findAllTopicsInGivenTopicList(Set<String> givenTopics) {
+        return topicRepository.findAllByNameIn(new ArrayList<>(givenTopics));
+    }
+
+    @Override
+    public void checkAllGivenTopicsInDB(Set<String> givenTopics,
+                                        Set<TopicEntity> fromDB) {
+        Set<String> getTopicNames = fromDB
+                .stream()
+                .map(TopicEntity::getName)
+                .collect(Collectors.toSet());
+
+        givenTopics.removeAll(getTopicNames); // Eliminate
+        if( ! givenTopics.isEmpty())
+            throw new ResourceNotFoundException("Topics", "topics", givenTopics.toString());
+
     }
 
 

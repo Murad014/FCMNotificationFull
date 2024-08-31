@@ -4,19 +4,19 @@ package com.pushnotification.pushnotification.service;
 import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.dto.TopicDto;
 import com.pushnotification.pushnotification.entity.TopicEntity;
+import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
 import com.pushnotification.pushnotification.helper.TopicEntityCreatorHelper;
 import com.pushnotification.pushnotification.repository.TopicRepository;
 import com.pushnotification.pushnotification.service.impl.TopicServiceImpl;
 import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -80,7 +80,7 @@ public class TopicServiceTest {
 
         // When
         for(var lang: PlatformLanguages.values()) {
-            final var topicNameWithLang = testName.concat("_").concat(lang.toString().toLowerCase());
+            final var topicNameWithLang = testName.concat("_").concat(lang.toString());
             topicEntity.setName(topicNameWithLang);
             when(topicRepository.findByName(topicNameWithLang)).thenReturn(Optional.of(topicEntity));
             when(topicRepository.save(topicEntity)).thenReturn(topicEntity);
@@ -110,9 +110,73 @@ public class TopicServiceTest {
         // Verify
         verify(topicRepository, times(1)).findAll();
         verify(modelMapper, times(2)).map(any(), any());
-
     }
 
+    @Test
+    @DisplayName("Find All Topics in given topics list")
+    @Order(4)
+    void testFindAllTopicsInGivenTopicList() {
+        // Arrange
+        var topic01 = new TopicEntity();
+        topic01.setName("Topic1");
+        var topic02 = new TopicEntity();
+        topic02.setName("Topic2");
+
+        Set<String> givenTopics = new HashSet<>(Arrays.asList("Topic1", "Topic2", "Topic3"));
+        Set<TopicEntity> mockTopics = new HashSet<>(Arrays.asList(topic01, topic02));
+        Mockito.when(topicRepository.findAllByNameIn(anyList())).thenReturn(mockTopics);
+
+        // Act
+        Set<TopicEntity> result = topicService.findAllTopicsInGivenTopicList(givenTopics);
+
+        // Assert
+        assertEquals(2, result.size());
+        assertEquals(new HashSet<>(mockTopics), result);
+        verify(topicRepository, Mockito.times(1)).findAllByNameIn(new ArrayList<>(givenTopics));
+    }
+
+    @DisplayName("Check Given All Topics in DB")
+    @Test
+    void testCheckAllGivenTopicsInDB_AllTopicsPresent() {
+        // Arrange
+        var topic01 = new TopicEntity();
+        topic01.setName("Topic1");
+        var topic02 = new TopicEntity();
+        topic02.setName("Topic2");
+        var topic03 = new TopicEntity();
+        topic03.setName("Topic3");
+
+        Set<String> givenTopics = new HashSet<>(Arrays.asList("Topic1", "Topic2", "Topic3"));
+        Set<TopicEntity> fromDB = new HashSet<>(Arrays.asList(topic01, topic02, topic03));
+
+        // Act & Assert (No exception should be thrown)
+        topicService.checkAllGivenTopicsInDB(givenTopics, fromDB);
+    }
+
+    @DisplayName("Check Given All Topics not in DB")
+    @Test
+    void testCheckAllGivenTopicsInDB_SomeTopicsMissing() {
+        // Arrange
+        var topic01 = new TopicEntity();
+        topic01.setName("Topic1");
+        var topic02 = new TopicEntity();
+        topic02.setName("Topic2");
+        var topic03 = new TopicEntity();
+        topic03.setName("Topic3");
+
+        Set<String> givenTopics = new HashSet<>(Arrays.asList("Topic1", "Topic2", "Topic4"));
+        Set<TopicEntity> fromDB = new HashSet<>(Arrays.asList(topic01, topic02, topic03));
+
+        // Act & Assert (Exception should be thrown)
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> topicService.checkAllGivenTopicsInDB(givenTopics, fromDB)
+        );
+
+        assertEquals("Topics", exception.getResourceName());
+        assertEquals("topics", exception.getFieldName());
+        assertEquals("[Topic4]", exception.getFieldValue());
+    }
 
 
 

@@ -6,11 +6,14 @@ import com.pushnotification.pushnotification.dto.UserUpdateDto;
 import com.pushnotification.pushnotification.entity.UserEntity;
 import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
 import com.pushnotification.pushnotification.repository.UserRepository;
+import com.pushnotification.pushnotification.service.TopicService;
 import com.pushnotification.pushnotification.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -18,12 +21,15 @@ public class UsersServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final TopicService topicService;
 
     @Autowired
     public UsersServiceImpl(UserRepository userRepository,
-                            ModelMapper modelMapper) {
+                            ModelMapper modelMapper,
+                            TopicService topicService) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.topicService = topicService;
     }
 
     @Override
@@ -53,4 +59,33 @@ public class UsersServiceImpl implements UserService {
         findByCif.setIsActive(false);
         userRepository.save(findByCif);
     }
+
+    @Override
+    public void setTopicsByUserCif(String cif, Set<String> topics) {
+        // Check User that exists
+        var getUserByCif = userRepository.findByCif(cif).orElseThrow(
+                () -> new ResourceNotFoundException("User", "cif", cif)
+        );
+
+        // Convert Topics Name
+        topics = topics
+                .stream()
+                .map(name -> name.toUpperCase()
+                        .concat("_")
+                        .concat(getUserByCif.getPlatformLanguage().toString()))
+                .collect(Collectors.toSet());
+
+        var getAllTopicsInGivenList = topicService.findAllTopicsInGivenTopicList(topics);
+
+        // Check Topics exist
+        topicService.checkAllGivenTopicsInDB(topics, getAllTopicsInGivenList);
+
+        // Set Topics to User
+        getUserByCif.setTopics(getAllTopicsInGivenList);
+
+        // Save the User
+        userRepository.save(getUserByCif);
+    }
+
+
 }

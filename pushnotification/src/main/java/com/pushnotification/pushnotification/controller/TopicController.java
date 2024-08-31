@@ -41,11 +41,6 @@ public class TopicController {
     @DeleteMapping("/{topicName}")
     public ResponseEntity<ResponseDto<Object>> deleteTopic(@Valid @PathVariable("topicName") String name) {
         topicService.deleteTopic(name);
-        var responseDto = new ResponseDto<>();
-        responseDto.setCode(204);
-        responseDto.setMessage("Topic deleted successfully");
-        responseDto.setPath("/api/v1/topics/" + name);
-
         return buildResponse(HttpStatus.OK, "topic.deleted.success.message", null);
     }
 
