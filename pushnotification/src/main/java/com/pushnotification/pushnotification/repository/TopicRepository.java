@@ -11,5 +11,4 @@ public interface TopicRepository extends JpaRepository<TopicEntity, Long> {
     boolean existsByName(String name);
     Set<TopicEntity> findAllByNameIn(List<String> names);
     Optional<TopicEntity> findByName(String name);
-
 }

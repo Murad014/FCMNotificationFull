@@ -1,78 +1,66 @@
 package com.pushnotification.pushnotification.controller;
 
-
 import com.pushnotification.pushnotification.dto.ResponseDto;
 import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
 import com.pushnotification.pushnotification.entity.UserEntity;
+import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
 import com.pushnotification.pushnotification.repository.UserRepository;
 import com.pushnotification.pushnotification.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
-
+    private static final String MAIN_PATH = "/api/v1/users";
     private final UserService userService;
-
-    private static final int CREATE_STATUS_CODE = 201;
-    private static final int OK_STATUS_CODE = 200;
-    private static final String SELF_MAIN_LINK = "/api/v1/users";
-    private final MessageSource messageSource;
+    private final GenerateResponseHelper generateResponseHelper;
 
 
     @Autowired
-    public UserController(UserService userService, MessageSource messageSource) {
+    public UserController(UserService userService, GenerateResponseHelper generateResponseHelper) {
         this.userService = userService;
-        this.messageSource = messageSource;
+        this.generateResponseHelper = generateResponseHelper;
     }
 
     @PostMapping
     public ResponseEntity<ResponseDto<UserDto>> createUser(@Valid @RequestBody UserDto userDto) {
         UserDto createdUser = userService.createUser(userDto);
-        var responseDto = new ResponseDto<UserDto>();
 
-        String message = messageSource.getMessage(
-                "user.created.message",
-                null,
-                LocaleContextHolder.getLocale());
-
-        responseDto.setMessage(message);
-        responseDto.setData(createdUser);
-        responseDto.setCode(CREATE_STATUS_CODE);
-        responseDto.setPath(SELF_MAIN_LINK);
-
-
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+        return buildResponse(HttpStatus.CREATED, "user.created.message",
+                createdUser, MAIN_PATH);
     }
 
     @PutMapping("/{cif}")
     public ResponseEntity<ResponseDto<UserUpdateDto>> updateUser(@PathVariable("cif") String cif,
                                                                  @Valid @RequestBody UserUpdateDto userDto) {
-
         UserUpdateDto updatedUser = userService.updateUser(cif, userDto);
-        String message = messageSource.getMessage(
-                "user.updated.message",
-                null,
-                LocaleContextHolder.getLocale());
 
-        var responseDto = new ResponseDto<UserUpdateDto>();
-
-        responseDto.setMessage(message);
-        responseDto.setData(updatedUser);
-        responseDto.setCode(OK_STATUS_CODE);
-        responseDto.setPath(SELF_MAIN_LINK.concat("/").concat(cif));
-
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return buildResponse(HttpStatus.OK, "user.updated.message",
+                updatedUser, MAIN_PATH.concat("/").concat(cif));
     }
 
+    @PutMapping("/{cif}/topics")
+    public ResponseEntity<ResponseDto<UserUpdateDto>> setTopicsByUserCif(@PathVariable("cif") String cif,
+                                                                @RequestBody Map<String, Set<String>> requestBody) {
+        userService.setTopicsByUserCif(cif, requestBody.get("topics"));
 
+        return buildResponse(HttpStatus.OK, "user.topics.set.successfully",
+                null, MAIN_PATH.concat("/").concat(cif).concat("/topics"));
+    }
+
+    private <D> ResponseEntity<ResponseDto<D>> buildResponse(HttpStatus status, String messageKey,
+                                                             D data, String path) {
+        var response = generateResponseHelper.generateResponse(status.value(), messageKey, data, path);
+        return new ResponseEntity<>(response, status);
+    }
 }
