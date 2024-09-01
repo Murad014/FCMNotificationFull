@@ -6,12 +6,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.SQLRestriction;
-
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,6 +34,10 @@ public class TopicEntity extends BaseEntity{
     @ManyToMany
     @Filter(name = "activeFilter", condition = ":isActive = is_active")
     Set<UserEntity> users = new HashSet<>();
+
+    @ManyToMany
+    @Filter(name = "activeFilter", condition = ":isActive = is_active")
+    Set<NotificationEntity> notifications = new HashSet<>();
 
     @PrePersist
     public void prePersist() {

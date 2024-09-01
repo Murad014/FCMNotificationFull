@@ -2,7 +2,10 @@ package com.pushnotification.pushnotification.repository;
 
 
 import com.pushnotification.pushnotification.constant.Platform;
+import com.pushnotification.pushnotification.entity.NotificationEntity;
 import com.pushnotification.pushnotification.entity.UserEntity;
+import com.pushnotification.pushnotification.helper.NotificationCreator;
+import com.pushnotification.pushnotification.helper.TopicEntityCreatorHelper;
 import com.pushnotification.pushnotification.helper.UserEntityCreatorHelper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.*;
@@ -29,6 +32,8 @@ public class UserRepositoryTest {
     private TopicRepository topicRepository;
 
     private static final int SIZE_LIST = 10;
+    @Autowired
+    private NotificationRepository notificationRepository;
 
 
     @BeforeEach
@@ -202,7 +207,7 @@ public class UserRepositoryTest {
 
     @Test
     @DisplayName("Exists User By Token")
-    @Order(8)
+    @Order(9)
     public void givenToken_whenFind_thenReturnTrue_otherwiseReturnFalse(){
         // Arrange
         entity.setIsActive(true);
@@ -214,7 +219,6 @@ public class UserRepositoryTest {
         // Assert
         assertTrue(exists);
     }
-
 
 
 

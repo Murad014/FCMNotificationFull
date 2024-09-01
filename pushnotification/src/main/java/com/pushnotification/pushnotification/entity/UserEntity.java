@@ -9,9 +9,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
-
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,6 +27,7 @@ public class UserEntity extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
     String cif;
 
     @ManyToMany
@@ -37,8 +37,14 @@ public class UserEntity extends BaseEntity{
             inverseJoinColumns = @JoinColumn(name = "topic_id"))
     Set<TopicEntity> topics = new HashSet<>();
 
+    @ManyToMany
+    @Filter(name = "activeFilter", condition = ":isActive = is_active")
+    Set<NotificationEntity> notifications = new HashSet<>();
+
     String uuid = UUID.randomUUID().toString();
+
     String token;
+
     @Enumerated(EnumType.STRING)
     Platform platform;
 

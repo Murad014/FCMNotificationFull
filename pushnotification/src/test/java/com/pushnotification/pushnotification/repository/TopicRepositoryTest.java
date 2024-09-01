@@ -1,6 +1,7 @@
 package com.pushnotification.pushnotification.repository;
 
 import com.pushnotification.pushnotification.entity.TopicEntity;
+import com.pushnotification.pushnotification.helper.NotificationCreator;
 import com.pushnotification.pushnotification.helper.TopicEntityCreatorHelper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -11,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -121,7 +123,6 @@ public class TopicRepositoryTest {
         // Assert
         assertEquals(givenList.size(), result.size());
     }
-
 
 
 
