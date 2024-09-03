@@ -10,18 +10,17 @@ import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.SQLRestriction;
-
-
 import java.util.HashSet;
 import java.util.Set;
 
 
 @Entity
-@Table(name = "topic")
+@Table(name = "topics")
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SQLRestriction("is_active = true")
+@ToString
 public class TopicEntity extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,6 +36,10 @@ public class TopicEntity extends BaseEntity{
     @ManyToMany
     @Filter(name = "activeFilter", condition = ":isActive = is_active")
     Set<UserEntity> users = new HashSet<>();
+
+    @ManyToMany
+    @Filter(name = "activeFilter", condition = ":isActive = is_active")
+    Set<NotificationEntity> notifications = new HashSet<>();
 
     @PrePersist
     public void prePersist() {

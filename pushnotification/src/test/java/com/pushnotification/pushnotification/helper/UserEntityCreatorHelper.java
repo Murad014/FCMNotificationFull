@@ -17,8 +17,6 @@ import java.util.stream.Stream;
 public class UserEntityCreatorHelper {
 
     public static UserEntity entity(){
-        Set<TopicEntity> topics = new HashSet<>();
-        topics.add(TopicEntityCreatorHelper.entity());
 
         Platform[] platforms = Platform.values();
         UserEntity entity = new UserEntity();
@@ -27,7 +25,6 @@ public class UserEntityCreatorHelper {
         entity.setUuid(UUID.randomUUID().toString());
         entity.setToken(RandomStringUtils.randomAlphabetic(200));
         entity.setPlatform(platforms[Integer.parseInt(RandomStringUtils.randomNumeric(4)) % platforms.length]);
-        entity.setTopics(topics);
         entity.setPlatformLanguage(PlatformLanguages.AZ);
         entity.setIsActive(RandomGeneratorHelper.randomBoolean());
 
