@@ -3,17 +3,13 @@ package com.pushnotification.pushnotification.controller;
 import com.pushnotification.pushnotification.dto.ResponseDto;
 import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
-import com.pushnotification.pushnotification.entity.UserEntity;
 import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
-import com.pushnotification.pushnotification.repository.UserRepository;
 import com.pushnotification.pushnotification.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 

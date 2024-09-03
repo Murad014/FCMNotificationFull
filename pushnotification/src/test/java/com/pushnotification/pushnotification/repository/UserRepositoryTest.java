@@ -2,10 +2,7 @@ package com.pushnotification.pushnotification.repository;
 
 
 import com.pushnotification.pushnotification.constant.Platform;
-import com.pushnotification.pushnotification.entity.NotificationEntity;
 import com.pushnotification.pushnotification.entity.UserEntity;
-import com.pushnotification.pushnotification.helper.NotificationCreator;
-import com.pushnotification.pushnotification.helper.TopicEntityCreatorHelper;
 import com.pushnotification.pushnotification.helper.UserEntityCreatorHelper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.*;
