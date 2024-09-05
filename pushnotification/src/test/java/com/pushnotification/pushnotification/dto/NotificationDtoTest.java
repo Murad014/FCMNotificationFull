@@ -34,8 +34,7 @@ public class NotificationDtoTest {
         notificationDto.setImageUrl("http://example.com/image.png");
         notificationDto.setIconUrl("http://example.com/icon.png");
         notificationDto.setSubtitle("Sample Subtitle");
-        notificationDto.setSentToMq(true);
-        notificationDto.setSentToFcm(true);
+
 
         Set<ConstraintViolation<NotificationDto>> violations = validator.validate(notificationDto);
         System.out.println(violations);
@@ -51,8 +50,6 @@ public class NotificationDtoTest {
         notificationDto.setImageUrl("http://example.com/image.png");
         notificationDto.setIconUrl("http://example.com/icon.png");
         notificationDto.setSubtitle("Sample Subtitle");
-        notificationDto.setSentToMq(true);
-        notificationDto.setSentToFcm(true);
 
         Set<ConstraintViolation<NotificationDto>> violations = validator.validate(notificationDto);
         assertFalse(violations.isEmpty());
@@ -67,8 +64,6 @@ public class NotificationDtoTest {
         notificationDto.setImageUrl("http://example.com/image.png");
         notificationDto.setIconUrl("http://example.com/icon.png");
         notificationDto.setSubtitle("Sample Subtitle");
-        notificationDto.setSentToMq(true);
-        notificationDto.setSentToFcm(true);
 
         Set<ConstraintViolation<NotificationDto>> violations = validator.validate(notificationDto);
         assertTrue(violations.isEmpty());

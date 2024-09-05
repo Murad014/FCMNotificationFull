@@ -1,6 +1,5 @@
 package com.pushnotification.pushnotification.service.impl;
 
-
 import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
 import com.pushnotification.pushnotification.entity.UserEntity;
@@ -67,7 +66,7 @@ public class UsersServiceImpl implements UserService {
                 () -> new ResourceNotFoundException("User", "cif", cif)
         );
 
-        // Convert Topics Name
+        // Concat topicNames to user's device lang
         topics = topics
                 .stream()
                 .map(name -> name.toUpperCase()

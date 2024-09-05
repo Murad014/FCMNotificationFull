@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,7 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public TopicDto createTopic(TopicDto topicDto) {
         // Create given topic for all Languages
+        var bulkSaveTopics = new ArrayList<TopicEntity>();
         for(var lang: PlatformLanguages.values()) {
             final var topicNameWithLang = topicDto
                     .getName()
@@ -39,8 +41,9 @@ public class TopicServiceImpl implements TopicService {
             var convertToEntity = modelMapper.map(topicDto, TopicEntity.class);
 
             convertToEntity.setName(topicNameWithLang);
-            topicRepository.save(convertToEntity);
+            bulkSaveTopics.add(convertToEntity);
         }
+        topicRepository.saveAll(bulkSaveTopics); // Saved for all Languages
 
         return topicDto;
     }
@@ -76,14 +79,17 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public void checkAllGivenTopicsInDB(Set<String> givenTopics,
                                         Set<TopicEntity> fromDB) {
+
+        var copyOfGivenTopics = new HashSet<>(givenTopics);
+
         Set<String> getTopicNames = fromDB
                 .stream()
                 .map(TopicEntity::getName)
                 .collect(Collectors.toSet());
 
-        givenTopics.removeAll(getTopicNames); // Eliminate
-        if( ! givenTopics.isEmpty())
-            throw new ResourceNotFoundException("Topics", "topics", givenTopics.toString());
+        copyOfGivenTopics.removeAll(getTopicNames); // Eliminate
+        if( ! copyOfGivenTopics.isEmpty())
+            throw new ResourceNotFoundException("Topics", "topics", copyOfGivenTopics.toString());
 
     }
 

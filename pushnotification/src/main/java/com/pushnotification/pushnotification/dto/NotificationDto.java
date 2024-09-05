@@ -26,6 +26,4 @@ public class NotificationDto {
     String imageUrl;
     String iconUrl;
     String subtitle;
-    boolean sentToMq;
-    boolean sentToFcm;
 }

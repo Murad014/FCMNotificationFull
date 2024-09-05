@@ -1,30 +1,31 @@
 package com.pushnotification.pushnotification.controller;
 
 import com.pushnotification.pushnotification.dto.NotificationDto;
+import com.pushnotification.pushnotification.dto.request.PushNotificationDto;
+import com.pushnotification.pushnotification.service.NotificationService;
 import com.pushnotification.pushnotification.service.RabbitMQService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/notification")
 public class NotificationController {
-    private final RabbitMQService rabbitMQService;
+    private final NotificationService notificationService;
 
     @Autowired
-    public NotificationController(RabbitMQService rabbitMQService) {
-        this.rabbitMQService = rabbitMQService;
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
     }
 
-    @GetMapping
-    public String sendMessage(){
-        var notificationDto = new NotificationDto();
-        notificationDto.setTitle("Titlooo");
-        notificationDto.setBody("Bodyoooo");
-        rabbitMQService.sendNotificationMessage(notificationDto);
+    @PostMapping("/send/topics")
+    public ResponseEntity<?> sendMessage(@RequestBody PushNotificationDto pushNotificationDto) {
 
-        return "SUCCESS";
+        notificationService.sendNotificationByTopics(pushNotificationDto.getLangAndNotification(),
+                pushNotificationDto.getTopics());
+
+        return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
 }

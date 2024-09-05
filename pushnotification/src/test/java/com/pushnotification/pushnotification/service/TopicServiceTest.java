@@ -53,14 +53,14 @@ public class TopicServiceTest {
         topicDto.setName(topicEntity.getName().concat("_az"));
         // When
         when(modelMapper.map(topicDto, TopicEntity.class)).thenReturn(topicEntity);
-        when(topicRepository.save(topicEntity)).thenReturn(topicEntity);
+        when(topicRepository.saveAll(topicEntities)).thenReturn(topicEntities);
         when(modelMapper.map(topicEntity, TopicDto.class)).thenReturn(topicDto);
 
         // Act
         var saved = topicService.createTopic(topicDto);
 
         // Verify
-        verify(topicRepository, times(3)).save(topicEntity);
+        verify(topicRepository, times(1)).saveAll(any());
         verify(modelMapper, times(3)).map(topicDto, TopicEntity.class);
 
         // Assert
