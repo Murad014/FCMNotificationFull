@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Set;
+
 @RestController
 @RequestMapping("/api/v1/notification")
 public class NotificationController {
@@ -21,11 +24,14 @@ public class NotificationController {
 
     @PostMapping("/send/topics")
     public ResponseEntity<?> sendMessage(@RequestBody PushNotificationDto pushNotificationDto) {
-
-        notificationService.sendNotificationByTopics(pushNotificationDto.getLangAndNotification(),
+        notificationService.saveAndSendNotificationByTopics(pushNotificationDto,
                 pushNotificationDto.getTopics());
 
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
+    @GetMapping("/user/{cif}")
+    public ResponseEntity<Set<NotificationDto>> getAllNotifications(@PathVariable("cif") String cif) {
+        return new ResponseEntity<>(notificationService.fetchNotificationsByUserCif(cif), HttpStatus.OK);
+    }
 }

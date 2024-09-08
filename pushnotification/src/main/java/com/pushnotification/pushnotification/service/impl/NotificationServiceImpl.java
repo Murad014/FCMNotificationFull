@@ -2,16 +2,21 @@ package com.pushnotification.pushnotification.service.impl;
 
 import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.dto.NotificationDto;
+import com.pushnotification.pushnotification.dto.request.PushNotificationDto;
 import com.pushnotification.pushnotification.entity.NotificationEntity;
 import com.pushnotification.pushnotification.entity.TopicEntity;
+import com.pushnotification.pushnotification.entity.UserEntity;
+import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
 import com.pushnotification.pushnotification.exceptions.WrongRequestBodyException;
 import com.pushnotification.pushnotification.repository.NotificationRepository;
-import com.pushnotification.pushnotification.repository.TopicRepository;
+import com.pushnotification.pushnotification.repository.UserRepository;
 import com.pushnotification.pushnotification.service.NotificationService;
+import com.pushnotification.pushnotification.service.RabbitMQService;
 import com.pushnotification.pushnotification.service.TopicService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,64 +25,102 @@ import java.util.stream.Collectors;
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final TopicService topicService;
-    private final TopicRepository topicRepository;
     private final ModelMapper modelMapper;
+    private final UserRepository userRepository;
+    private final RabbitMQService rabbitMQService;
 
     @Autowired
     public NotificationServiceImpl(NotificationRepository notificationRepository,
                                    TopicService topicService,
-                                   TopicRepository topicRepository, ModelMapper modelMapper) {
+                                   ModelMapper modelMapper,
+                                   UserRepository userRepository,
+                                   RabbitMQService rabbitMQService) {
+
         this.notificationRepository = notificationRepository;
         this.topicService = topicService;
-        this.topicRepository = topicRepository;
         this.modelMapper = modelMapper;
+        this.userRepository = userRepository;
+        this.rabbitMQService = rabbitMQService;
     }
 
 
     @Override
-    public void sendNotificationByTopics(Map<PlatformLanguages, NotificationDto> notificationsWithLanguages,
-                                         Set<String> topics) {
-
+    @Transactional
+    public void saveAndSendNotificationByTopics(PushNotificationDto pushNotificationDto,
+                                                Set<String> givenTopics) {
+        var notificationsWithLanguages = pushNotificationDto.getLangAndNotification();
         checkLanguagesKeys(notificationsWithLanguages);
+        Set<TopicEntity> allTopicsFromDB = checkAllGivenTopicsExistInDBThenReturnTopicsInDB(givenTopics);
 
-        var withLanguages = new ArrayList<String>();
-        for(var lang: PlatformLanguages.values())
-            topics.forEach(topic -> withLanguages.add(topic.concat("_" + lang).toUpperCase()) );
+        // Save
+        List<NotificationEntity> bulkSave = new ArrayList<>();
+        for(var language: PlatformLanguages.values()) {
+            Set<String> getTopicsForSpecLanguage = allTopicsFromDB.stream()
+                    .filter(topic -> topic.getName().endsWith("_" + language))
+                    .collect(Collectors.toSet())
+                    .stream()
+                    .map(TopicEntity:: getName)
+                    .collect(Collectors.toSet());
 
-        var getAllTopicsWithLang = topicService.findAllTopicsInGivenTopicList(new HashSet<>(withLanguages));
-        checkAllGivenTopicsExistInDB(new HashSet<>(withLanguages), getAllTopicsWithLang);
+            // Get Users that belongs given Topics
+            List<UserEntity> usersForGivenTopics = userRepository
+                    .findAllByTopics_NameIn(new ArrayList<>(getTopicsForSpecLanguage));
+            var notificationEntity = modelMapper
+                    .map(notificationsWithLanguages.get(language), NotificationEntity.class);
 
-        // Set Notification topics
-        var bulkSaveNotification = new ArrayList<NotificationEntity>();
+            notificationEntity.setUsers(new HashSet<>(usersForGivenTopics));
 
-        for(var notificationMap : notificationsWithLanguages.entrySet()) {
-            var notificationEntity = modelMapper.map(notificationMap.getValue(), NotificationEntity.class);
+            bulkSave.add(notificationEntity);
+        }
+        notificationRepository.saveAll(bulkSave);
 
-            getAllTopicsWithLang.forEach(topic -> {
-                if (topic.getName().endsWith(notificationMap.getKey().toString()))
-                    notificationEntity.getTopics().add(topic);
-            });
-            bulkSaveNotification.add(notificationEntity);
+        // Send
+        rabbitMQService.sendNotificationMessage(pushNotificationDto);
+
+    }
+
+    @Override
+    public void sendNotificationByUsers(PushNotificationDto pushNotificationDto,
+                                        Set<String> userCifs) {
+        checkLanguagesKeys(pushNotificationDto.getLangAndNotification());
+
+    }
+
+    @Override
+    public Set<NotificationDto> fetchNotificationsByUserCif(String cif) {
+        userRepository.findByCif(cif).orElseThrow(
+                () -> new ResourceNotFoundException("User", "cif", cif)
+        );
+
+        return notificationRepository.findAllByUsers_Cif(cif).stream().map(notificationEntity ->
+                modelMapper.map(notificationEntity, NotificationDto.class))
+                .collect(Collectors.toSet());
+    }
+
+
+
+    private Set<TopicEntity> checkAllGivenTopicsExistInDBThenReturnTopicsInDB(Set<String> givenTopics) {
+        Set<String> givenTopicsForAllLanguages = new HashSet<>();
+
+        for(var language: PlatformLanguages.values()) {
+            givenTopics
+                    .forEach(topic -> {
+                        var topicNameWithLang = topic.toUpperCase().concat("_" + language);
+
+                        givenTopicsForAllLanguages.add(topicNameWithLang);
+                    });
         }
 
-        notificationRepository.saveAll(bulkSaveNotification);
-    }
+        var topicListFromDB = topicService.findAllTopicsInGivenTopicList(givenTopicsForAllLanguages);
+        topicService.checkAllGivenTopicsInDB(givenTopicsForAllLanguages, topicListFromDB);
 
-    @Override
-    public void sendNotificationByUsers(Map<PlatformLanguages, NotificationDto> notificationsWithLanguages,
-                                        Set<String> userCifs) {
-        checkLanguagesKeys(notificationsWithLanguages);
-    }
-
-
-    private void checkAllGivenTopicsExistInDB(Set<String> givenTopics, Set<TopicEntity> topicEntitySet) {
-        topicService.checkAllGivenTopicsInDB(givenTopics, topicEntitySet);
+        return topicListFromDB;
     }
 
     private void checkLanguagesKeys(Map<PlatformLanguages, NotificationDto> notificationsWithLanguages) {
         for (var lang : PlatformLanguages.values()) {
             if(!notificationsWithLanguages.containsKey(lang))
-                throw new WrongRequestBodyException("Language " + lang + " is not supported");
+                throw new WrongRequestBodyException("Language " + lang + " is missing!");
         }
     }
 }

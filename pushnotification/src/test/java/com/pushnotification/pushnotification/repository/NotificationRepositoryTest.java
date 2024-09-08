@@ -67,7 +67,6 @@ public class NotificationRepositoryTest {
         topicRepository.saveAll(topics);
 
 
-        entity.setTopics(new HashSet<>(topics));
         entity.setUsers(new HashSet<>(users));
 
 
@@ -77,43 +76,8 @@ public class NotificationRepositoryTest {
         // Assertions
         assertNotNull(save);
         assertFalse(save.getUsers().isEmpty());
-        assertFalse(save.getTopics().isEmpty());
         assertEquals(save.getUsers().size(), 5);
-        assertEquals(save.getTopics().size(), 5);
     }
-
-    @Test
-    @DisplayName("Get All Notifications by User Cif id")
-    @Order(3)
-    @Transactional
-    public void givenUserCifId_whenFindAll_thenReturnList() {
-
-        // Topics
-        var topic01 = TopicEntityCreatorHelper.entity();
-        topic01.setIsActive(true);
-        var topicSave01 = topicRepository.save(topic01);
-
-        // User
-        var user01 = UserEntityCreatorHelper.entity();
-        user01.setTopics(new HashSet<>(List.of(topicSave01)));
-        user01.setIsActive(true);
-        var user01Save = userRepository.save(user01);
-
-        // Notification
-        var notification01 = NotificationCreator.entity();
-        notification01.setIsActive(true);
-        notification01.setTopics(new HashSet<>(List.of(topicSave01)));
-
-        notificationRepository.save(notification01);
-
-        var findAll = notificationRepository.findActiveNotificationsByCif(user01.getCif());
-
-        // Assert
-        assertNotNull(findAll);
-        assertFalse(findAll.isEmpty());
-
-    }
-
 
 
     private void customAssertions(NotificationEntity expected, NotificationEntity actual) {

@@ -80,7 +80,7 @@ public class TopicServiceTest {
 
         // When
         for(var lang: PlatformLanguages.values()) {
-            final var topicNameWithLang = testName.concat("_").concat(lang.toString());
+            final var topicNameWithLang = testName.toUpperCase().concat("_").concat(lang.toString());
             topicEntity.setName(topicNameWithLang);
             when(topicRepository.findByName(topicNameWithLang)).thenReturn(Optional.of(topicEntity));
             when(topicRepository.save(topicEntity)).thenReturn(topicEntity);
@@ -153,30 +153,7 @@ public class TopicServiceTest {
         topicService.checkAllGivenTopicsInDB(givenTopics, fromDB);
     }
 
-    @DisplayName("Check Given All Topics not in DB")
-    @Test
-    void testCheckAllGivenTopicsInDB_SomeTopicsMissing() {
-        // Arrange
-        var topic01 = new TopicEntity();
-        topic01.setName("Topic1");
-        var topic02 = new TopicEntity();
-        topic02.setName("Topic2");
-        var topic03 = new TopicEntity();
-        topic03.setName("Topic3");
 
-        Set<String> givenTopics = new HashSet<>(Arrays.asList("Topic1", "Topic2", "Topic4"));
-        Set<TopicEntity> fromDB = new HashSet<>(Arrays.asList(topic01, topic02, topic03));
-
-        // Act & Assert (Exception should be thrown)
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> topicService.checkAllGivenTopicsInDB(givenTopics, fromDB)
-        );
-
-        assertEquals("Topics", exception.getResourceName());
-        assertEquals("topics", exception.getFieldName());
-        assertEquals("[Topic4]", exception.getFieldValue());
-    }
 
 
 

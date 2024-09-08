@@ -51,7 +51,11 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public void deleteTopic(String name) {
         for(var lang: PlatformLanguages.values()) {
-            final var topicNameWithLang = name.concat("_").concat(lang.toString());
+            final var topicNameWithLang = name
+                    .toUpperCase()
+                    .concat("_")
+                    .concat(lang.toString());
+
             var findByTopicName = topicRepository.findByName(topicNameWithLang).orElse(null);
             if(findByTopicName != null) {
                 findByTopicName.setIsActive(false);
@@ -80,7 +84,7 @@ public class TopicServiceImpl implements TopicService {
     public void checkAllGivenTopicsInDB(Set<String> givenTopics,
                                         Set<TopicEntity> fromDB) {
 
-        var copyOfGivenTopics = new HashSet<>(givenTopics);
+        Set<String> copyOfGivenTopics = new HashSet<>(givenTopics);
 
         Set<String> getTopicNames = fromDB
                 .stream()
@@ -88,8 +92,12 @@ public class TopicServiceImpl implements TopicService {
                 .collect(Collectors.toSet());
 
         copyOfGivenTopics.removeAll(getTopicNames); // Eliminate
-        if( ! copyOfGivenTopics.isEmpty())
+        if( ! copyOfGivenTopics.isEmpty()) {
+            copyOfGivenTopics =
+                    copyOfGivenTopics.stream().map(topic ->
+                            topic.substring(0, topic.lastIndexOf('_'))).collect(Collectors.toSet());
             throw new ResourceNotFoundException("Topics", "topics", copyOfGivenTopics.toString());
+        }
 
     }
 

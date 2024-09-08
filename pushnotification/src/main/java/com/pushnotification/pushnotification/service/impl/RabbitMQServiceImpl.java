@@ -28,6 +28,6 @@ public class RabbitMQServiceImpl implements RabbitMQService {
     @Override
     @RabbitListener(queues = "${push-notification.rabbitmq.queueName}")
     public void receiveNotificationMessage(PushNotificationDto notificationDto) {
-        System.out.println("RECIEVED MESSAGE: " + notificationDto);
+        System.out.println("RECEIVED MESSAGE: " + notificationDto);
     }
 }

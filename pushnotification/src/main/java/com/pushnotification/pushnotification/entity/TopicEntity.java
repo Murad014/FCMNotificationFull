@@ -37,9 +37,6 @@ public class TopicEntity extends BaseEntity{
     @Filter(name = "activeFilter", condition = ":isActive = is_active")
     Set<UserEntity> users = new HashSet<>();
 
-    @ManyToMany
-    @Filter(name = "activeFilter", condition = ":isActive = is_active")
-    Set<NotificationEntity> notifications = new HashSet<>();
 
     @PrePersist
     public void prePersist() {

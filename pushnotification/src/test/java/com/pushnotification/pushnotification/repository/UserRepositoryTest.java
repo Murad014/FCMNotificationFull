@@ -2,7 +2,9 @@ package com.pushnotification.pushnotification.repository;
 
 
 import com.pushnotification.pushnotification.constant.Platform;
+import com.pushnotification.pushnotification.entity.TopicEntity;
 import com.pushnotification.pushnotification.entity.UserEntity;
+import com.pushnotification.pushnotification.helper.TopicEntityCreatorHelper;
 import com.pushnotification.pushnotification.helper.UserEntityCreatorHelper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.*;
@@ -215,6 +217,40 @@ public class UserRepositoryTest {
 
         // Assert
         assertTrue(exists);
+    }
+
+    @Test
+    @DisplayName("Find All Users by Topics Names in")
+    @Transactional
+    @Order(10)
+    public void givenTopicsList_whenFindUsers_thenReturnUserList(){
+        // Arrange
+        var user01 = UserEntityCreatorHelper.entity();
+        var user02 = UserEntityCreatorHelper.entity();
+        user01.setIsActive(true);
+        user02.setIsActive(true);
+        userRepository.saveAll(Arrays.asList(user01, user02));
+
+        var topic01 = TopicEntityCreatorHelper.entity();
+        topic01.setIsActive(true);
+        var topic02 = TopicEntityCreatorHelper.entity();
+        topic02.setIsActive(true);
+        topicRepository.saveAll(Arrays.asList(topic01, topic02));
+
+        var findUserByCif = userRepository.findByCif(user01.getCif()).orElse(null);
+        var findTopicById = topicRepository.findById(topic01.getId()).orElse(null);
+        assertNotNull(findUserByCif);
+        assertNotNull(findTopicById);
+
+        findUserByCif.setTopics(new HashSet<>(List.of(findTopicById)));
+        userRepository.save(findUserByCif);
+
+        // Act
+        List<UserEntity> findUsers = userRepository.findAllByTopics_NameIn(new ArrayList<>(List.of(topic01.getName())));
+
+        // Asserts
+        assertNotNull(findUsers);
+        assertFalse(findUsers.isEmpty());
     }
 
 
