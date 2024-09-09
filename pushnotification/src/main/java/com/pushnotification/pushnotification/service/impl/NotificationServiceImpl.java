@@ -50,6 +50,7 @@ public class NotificationServiceImpl implements NotificationService {
                                                 Set<String> givenTopics) {
         var notificationsWithLanguages = pushNotificationDto.getLangAndNotification();
         checkLanguagesKeys(notificationsWithLanguages);
+
         Set<TopicEntity> allTopicsFromDB = checkAllGivenTopicsExistInDBThenReturnTopicsInDB(givenTopics);
 
         // Save
@@ -69,6 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .map(notificationsWithLanguages.get(language), NotificationEntity.class);
 
             notificationEntity.setUsers(new HashSet<>(usersForGivenTopics));
+            notificationEntity.setSentToMq(true);
 
             bulkSave.add(notificationEntity);
         }
@@ -76,15 +78,31 @@ public class NotificationServiceImpl implements NotificationService {
 
         // Send
         rabbitMQService.sendNotificationMessage(pushNotificationDto);
-
     }
 
     @Override
-    public void sendNotificationByUsers(PushNotificationDto pushNotificationDto,
-                                        Set<String> userCifs) {
-        checkLanguagesKeys(pushNotificationDto.getLangAndNotification());
+    @Transactional
+    public void  sendNotificationByUsers(PushNotificationDto pushNotificationDto, Set<String> userCifs) {
+        var notificationsWithLanguages = pushNotificationDto.getLangAndNotification();
+        checkLanguagesKeys(notificationsWithLanguages);
 
+        var getAllUsersByCifFromDB = userRepository.findAllByCifIn(new ArrayList<>(userCifs));
+        checkThatAllUsersExistInDB(userCifs, getAllUsersByCifFromDB);
+
+        // Set notifications as sent mq true and save
+        var bulkSave = new ArrayList<NotificationEntity>();
+        for(var language: PlatformLanguages.values()) {
+            var notification = pushNotificationDto.getLangAndNotification().get(language);
+            var toEntity = modelMapper.map(notification, NotificationEntity.class);
+            toEntity.setSentToMq(true);
+            bulkSave.add(toEntity);
+        }
+        notificationRepository.saveAll(bulkSave);
+
+        // Send
+        rabbitMQService.sendNotificationMessage(pushNotificationDto);
     }
+
 
     @Override
     public Set<NotificationDto> fetchNotificationsByUserCif(String cif) {
@@ -97,7 +115,19 @@ public class NotificationServiceImpl implements NotificationService {
                 .collect(Collectors.toSet());
     }
 
+    private void checkThatAllUsersExistInDB(Set<String> userCifs, List<UserEntity> getAllUsersByCifFromDB) {
+        Set<String> copy = new HashSet<>(userCifs);
+        Set<String> getNames = getAllUsersByCifFromDB
+                .stream()
+                .map(UserEntity:: getCif)
+                .collect(Collectors.toSet());
 
+        copy.removeAll(getNames); // Eliminate
+
+        if( ! copy.isEmpty())
+            throw new ResourceNotFoundException("Users", "cifs", copy.toString());
+
+    }
 
     private Set<TopicEntity> checkAllGivenTopicsExistInDBThenReturnTopicsInDB(Set<String> givenTopics) {
         Set<String> givenTopicsForAllLanguages = new HashSet<>();

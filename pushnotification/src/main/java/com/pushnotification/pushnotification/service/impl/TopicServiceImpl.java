@@ -1,9 +1,11 @@
 package com.pushnotification.pushnotification.service.impl;
 
 import com.pushnotification.pushnotification.constant.PlatformLanguages;
-import com.pushnotification.pushnotification.dto.TopicDto;
+import com.pushnotification.pushnotification.dto.request.TopicRequestDto;
+import com.pushnotification.pushnotification.dto.TopicFetchDto;
 import com.pushnotification.pushnotification.entity.TopicEntity;
 import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
+import com.pushnotification.pushnotification.exceptions.WrongRequestBodyException;
 import com.pushnotification.pushnotification.repository.TopicRepository;
 import com.pushnotification.pushnotification.service.TopicService;
 import lombok.extern.slf4j.Slf4j;
@@ -30,22 +32,26 @@ public class TopicServiceImpl implements TopicService {
 
 
     @Override
-    public TopicDto createTopic(TopicDto topicDto) {
+    public TopicRequestDto createTopic(TopicRequestDto topicRequestDto) {
+        // Check Topic Description with All Languages
+        checkAllLanguagesKeys(topicRequestDto);
+
         // Create given topic for all Languages
         var bulkSaveTopics = new ArrayList<TopicEntity>();
         for(var lang: PlatformLanguages.values()) {
-            final var topicNameWithLang = topicDto
+            final var topicNameWithLang = topicRequestDto
                     .getName()
                     .concat("_")
                     .concat(lang.toString());
-            var convertToEntity = modelMapper.map(topicDto, TopicEntity.class);
-
+            var convertToEntity = modelMapper.map(topicRequestDto, TopicEntity.class);
             convertToEntity.setName(topicNameWithLang);
+            convertToEntity.setDescription(topicRequestDto.getDescription().get(lang));
+
             bulkSaveTopics.add(convertToEntity);
         }
         topicRepository.saveAll(bulkSaveTopics); // Saved for all Languages
 
-        return topicDto;
+        return topicRequestDto;
     }
 
     @Override
@@ -67,11 +73,12 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
-    public Set<TopicDto> fetchAllTopics() {
-        return topicRepository
+    public Set<TopicFetchDto> fetchAllTopics() {
+
+        return  topicRepository
                 .findAll()
                 .stream()
-                .map(topicEntity -> modelMapper.map(topicEntity, TopicDto.class))
+                .map(topicEntity ->modelMapper.map(topicEntity, TopicFetchDto.class))
                 .collect(Collectors.toSet());
     }
 
@@ -99,6 +106,13 @@ public class TopicServiceImpl implements TopicService {
             throw new ResourceNotFoundException("Topics", "topics", copyOfGivenTopics.toString());
         }
 
+    }
+
+    private void checkAllLanguagesKeys(TopicRequestDto topicRequestDto){
+        for (var lang : PlatformLanguages.values()) {
+            if(!topicRequestDto.getDescription().containsKey(lang))
+                throw new WrongRequestBodyException("Language " + lang + " is missing!");
+        }
     }
 
 

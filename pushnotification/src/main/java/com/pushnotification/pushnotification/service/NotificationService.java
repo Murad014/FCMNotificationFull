@@ -12,7 +12,7 @@ public interface NotificationService {
     void saveAndSendNotificationByTopics(PushNotificationDto pushNotificationDto,
                                          Set<String> topics);
 
-    void sendNotificationByUsers(PushNotificationDto pushNotificationDto,
+    void  sendNotificationByUsers(PushNotificationDto pushNotificationDto,
                                  Set<String> userCifs);
 
     Set<NotificationDto> fetchNotificationsByUserCif(String cif);

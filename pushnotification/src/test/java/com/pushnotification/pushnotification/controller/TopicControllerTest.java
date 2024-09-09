@@ -1,7 +1,8 @@
 package com.pushnotification.pushnotification.controller;
 
 import com.pushnotification.pushnotification.dto.ResponseDto;
-import com.pushnotification.pushnotification.dto.TopicDto;
+import com.pushnotification.pushnotification.dto.request.TopicRequestDto;
+import com.pushnotification.pushnotification.dto.TopicFetchDto;
 import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
 import com.pushnotification.pushnotification.service.TopicService;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,35 +39,35 @@ class TopicControllerTest {
     @Test
     void testCreateTopic() {
         // Arrange
-        TopicDto topicDto = new TopicDto();
-        TopicDto savedTopicDto = new TopicDto();
-        ResponseDto<TopicDto> responseDto = new ResponseDto<>();
+        TopicRequestDto topicRequestDto = new TopicRequestDto();
+        TopicRequestDto savedTopicRequestDto = new TopicRequestDto();
+        ResponseDto<TopicRequestDto> responseDto = new ResponseDto<>();
         responseDto.setCode(HttpStatus.CREATED.value());
         responseDto.setMessage("topic.created.success.message");
-        responseDto.setData(savedTopicDto);
+        responseDto.setData(savedTopicRequestDto);
         responseDto.setPath(MAIN_PATH);
 
-        when(topicService.createTopic(topicDto)).thenReturn(savedTopicDto);
+        when(topicService.createTopic(topicRequestDto)).thenReturn(savedTopicRequestDto);
         when(generateResponseHelper.generateResponse(
-                HttpStatus.CREATED.value(), "topic.created.success.message", savedTopicDto, MAIN_PATH))
+                HttpStatus.CREATED.value(), "topic.created.success.message", savedTopicRequestDto, MAIN_PATH))
                 .thenReturn(responseDto);
 
         // Act
-        ResponseEntity<ResponseDto<TopicDto>> response = topicController.createTopic(topicDto);
+        ResponseEntity<ResponseDto<TopicRequestDto>> response = topicController.createTopic(topicRequestDto);
 
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(responseDto, response.getBody());
-        verify(topicService, times(1)).createTopic(topicDto);
+        verify(topicService, times(1)).createTopic(topicRequestDto);
         verify(generateResponseHelper, times(1))
-                .generateResponse(HttpStatus.CREATED.value(), "topic.created.success.message", savedTopicDto, MAIN_PATH);
+                .generateResponse(HttpStatus.CREATED.value(), "topic.created.success.message", savedTopicRequestDto, MAIN_PATH);
     }
 
     @Test
     void testGetTopics() {
         // Arrange
-        Set<TopicDto> topics = new HashSet<>();
-        ResponseDto<Set<TopicDto>> responseDto = new ResponseDto<>();
+        Set<TopicFetchDto> topics = new HashSet<>();
+        ResponseDto<Set<TopicFetchDto>> responseDto = new ResponseDto<>();
         responseDto.setCode(HttpStatus.OK.value());
         responseDto.setMessage("topic.fetched.success.message");
         responseDto.setData(topics);
@@ -78,7 +79,7 @@ class TopicControllerTest {
                 .thenReturn(responseDto);
 
         // Act
-        ResponseEntity<ResponseDto<Set<TopicDto>>> response = topicController.getTopics();
+        ResponseEntity<ResponseDto<Set<TopicFetchDto>>> response = topicController.getTopics();
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());

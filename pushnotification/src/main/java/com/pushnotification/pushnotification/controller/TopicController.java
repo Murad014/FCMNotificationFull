@@ -1,7 +1,8 @@
 package com.pushnotification.pushnotification.controller;
 
 import com.pushnotification.pushnotification.dto.ResponseDto;
-import com.pushnotification.pushnotification.dto.TopicDto;
+import com.pushnotification.pushnotification.dto.request.TopicRequestDto;
+import com.pushnotification.pushnotification.dto.TopicFetchDto;
 import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
 import com.pushnotification.pushnotification.service.TopicService;
 import jakarta.validation.Valid;
@@ -27,21 +28,21 @@ public class TopicController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseDto<TopicDto>> createTopic(@Valid @RequestBody TopicDto topicDto) {
-        var saved = topicService.createTopic(topicDto);
+    public ResponseEntity<ResponseDto<TopicRequestDto>> createTopic(@Valid @RequestBody TopicRequestDto topicRequestDto) {
+        var saved = topicService.createTopic(topicRequestDto);
         return buildResponse(HttpStatus.CREATED, "topic.created.success.message", saved);
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<Set<TopicDto>>> getTopics() {
-        Set<TopicDto> fetchAll = topicService.fetchAllTopics();
+    public ResponseEntity<ResponseDto<Set<TopicFetchDto>>> getTopics() {
+        Set<TopicFetchDto> fetchAll = topicService.fetchAllTopics();
         return buildResponse(HttpStatus.OK, "topic.fetched.success.message", fetchAll);
     }
 
     @DeleteMapping("/{topicName}")
-    public ResponseEntity<ResponseDto<Object>> deleteTopic(@Valid @PathVariable("topicName") String name) {
+    public ResponseEntity<ResponseDto<Void>> deleteTopic(@Valid @PathVariable("topicName") String name) {
         topicService.deleteTopic(name);
-        return buildResponse(HttpStatus.OK, "topic.deleted.success.message", null);
+        return buildResponse(HttpStatus.NO_CONTENT, "topic.deleted.success.message", null);
     }
 
     private <D> ResponseEntity<ResponseDto<D>> buildResponse(HttpStatus status, String messageKey,
