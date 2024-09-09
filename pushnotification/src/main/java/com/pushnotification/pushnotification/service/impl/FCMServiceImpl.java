@@ -4,16 +4,9 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.pushnotification.pushnotification.dto.NotificationDto;
-import com.pushnotification.pushnotification.entity.UserEntity;
-import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
-import com.pushnotification.pushnotification.repository.UserRepository;
 import com.pushnotification.pushnotification.service.FCMService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,10 +14,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FCMServiceImpl implements FCMService {
 
-    private final UserRepository userRepository;
-
-    public FCMServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public FCMServiceImpl() {
     }
 
     @Override

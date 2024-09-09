@@ -47,7 +47,15 @@ public class UsersServiceImpl implements UserService {
         findByCif.setPlatformLanguage(userDto.getPlatformLanguage());
 
         var updated = userRepository.save(findByCif);
-        return modelMapper.map(updated, UserUpdateDto.class);
+        var dto = modelMapper.map(updated, UserUpdateDto.class);
+        dto.setTopics(
+                findByCif.getTopics()
+                        .stream()
+                        .map(topic -> topic.getName().substring(0, topic.getName().lastIndexOf('_')))
+                        .collect(Collectors.toSet())
+        );
+
+        return dto;
     }
 
     @Override

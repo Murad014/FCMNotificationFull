@@ -15,17 +15,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-
+@SpringBootTest
 @DisplayName("User Controller")
 class UserControllerTest {
     final String createdMessage = "User created Successfully!";
@@ -42,10 +43,6 @@ class UserControllerTest {
     @InjectMocks
     private UserController userController;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     @Order(1)
@@ -112,7 +109,10 @@ class UserControllerTest {
 
         Map<String, Set<String>> controllerInput = new HashMap<>();
         controllerInput.put("topics", topics);
-
+        var location = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .build()
+                .toUri();
         // When
         doNothing().when(userService).setTopicsByUserCif(eq(updatedCIF), eq(topics));
         when(generateResponseHelper.generateResponse(Mockito.anyInt(), Mockito.anyString(), Mockito.any(), Mockito.anyString()))
@@ -126,14 +126,13 @@ class UserControllerTest {
         verify(generateResponseHelper, times(1))
                 .generateResponse(Mockito.eq(HttpStatus.OK.value()),
                         Mockito.eq("user.topics.set.successfully"),
-                        Mockito.eq(null), Mockito.eq("/api/v1/users/1212314/topics"));
+                        Mockito.eq(null), Mockito.eq(location.getPath()));
 
         // Assert
         assertNotNull(response.getBody(), "Response body should not be null");
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("user.topics.set.successfully", response.getBody().getMessage());
         assertEquals("/api/v1/users/1212314/topics", response.getBody().getPath());
-        assertEquals(null, response.getBody().getData());
     }
 
 

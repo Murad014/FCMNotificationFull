@@ -4,7 +4,6 @@ import com.pushnotification.pushnotification.dto.NotificationDto;
 import com.pushnotification.pushnotification.dto.ResponseDto;
 import com.pushnotification.pushnotification.dto.request.PushNotificationDto;
 import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
-import com.pushnotification.pushnotification.service.FCMService;
 import com.pushnotification.pushnotification.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,37 +27,38 @@ public class NotificationController {
     }
 
     @PostMapping("/send/topics")
-    public ResponseEntity<ResponseDto<Void>> sendMessage(@RequestBody PushNotificationDto pushNotificationDto) {
+    public ResponseEntity<ResponseDto<Void>> sendNotificationByTopics(@RequestBody PushNotificationDto pushNotificationDto) {
         notificationService.saveAndSendNotificationByTopics(pushNotificationDto,
                 pushNotificationDto.getTopics());
 
-        return buildResponse(HttpStatus.OK, "notification.send.successfully", null);
+        return buildResponse("notification.send.successfully", null);
+    }
+
+    @PostMapping("/send/users")
+    public ResponseEntity<ResponseDto<Void>> sendNotificationByUsers(@RequestBody PushNotificationDto pushNotificationDto) {
+        notificationService.sendNotificationByUsers(pushNotificationDto,
+                pushNotificationDto.getUsers());
+
+        return buildResponse("notification.send.successfully", null);
     }
 
     @GetMapping("/user/{cif}")
     public ResponseEntity<ResponseDto<Set<NotificationDto>>> getAllNotifications(@PathVariable("cif") String cif) {
         var response = notificationService.fetchNotificationsByUserCif(cif);
-        return buildResponse(HttpStatus.OK, "notification.fetch.successfully", response);
+        return buildResponse("notification.fetch.successfully", response);
     }
 
-    @PostMapping("/send/users")
-    public String sendNotification(@RequestBody PushNotificationDto pushNotificationDto) {
-        notificationService.sendNotificationByUsers(pushNotificationDto,
-                pushNotificationDto.getUsers());
 
-        return "SUCCESS";
-    }
-
-    private <D> ResponseEntity<ResponseDto<D>> buildResponse(HttpStatus status, String messageKey, D data) {
+    private <D> ResponseEntity<ResponseDto<D>> buildResponse(String messageKey, D data) {
         var location = ServletUriComponentsBuilder
                 .fromCurrentRequestUri()
                 .build()
                 .toUri();
 
-        var response = generateResponseHelper.generateResponse(status.value(), messageKey, data,
+        var response = generateResponseHelper.generateResponse(HttpStatus.OK.value(), messageKey, data,
                 location.getPath());
 
-        return new ResponseEntity<>(response, status);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Set;
 
@@ -19,8 +20,7 @@ public class TopicController {
 
     private final TopicService topicService;
     private final GenerateResponseHelper generateResponseHelper;
-    private final static String MAIN_PATH = "/api/v1/topics";
-    
+
     @Autowired
     public TopicController(TopicService topicService, GenerateResponseHelper generateResponseHelper) {
         this.topicService = topicService;
@@ -47,8 +47,12 @@ public class TopicController {
 
     private <D> ResponseEntity<ResponseDto<D>> buildResponse(HttpStatus status, String messageKey,
                                                              D data) {
+        var location = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .build()
+                .toUri();
         var response = generateResponseHelper.generateResponse(status.value(), messageKey, data,
-                TopicController.MAIN_PATH);
+                location.getPath());
         return new ResponseEntity<>(response, status);
     }
 
