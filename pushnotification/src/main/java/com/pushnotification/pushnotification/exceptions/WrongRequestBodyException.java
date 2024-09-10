@@ -13,4 +13,5 @@ public class WrongRequestBodyException extends RuntimeException {
         super(message);
         this.message = message;
     }
+
 }

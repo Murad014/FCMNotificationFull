@@ -8,6 +8,7 @@ import com.pushnotification.pushnotification.entity.TopicEntity;
 import com.pushnotification.pushnotification.entity.UserEntity;
 import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
 import com.pushnotification.pushnotification.exceptions.WrongRequestBodyException;
+import com.pushnotification.pushnotification.helpers.MessageSourceReaderHelper;
 import com.pushnotification.pushnotification.repository.NotificationRepository;
 import com.pushnotification.pushnotification.repository.UserRepository;
 import com.pushnotification.pushnotification.service.NotificationService;
@@ -17,7 +18,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,19 +28,26 @@ public class NotificationServiceImpl implements NotificationService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final RabbitMQService rabbitMQService;
+    private final MessageSourceReaderHelper messageSourceReaderHelper;
+
+    private static final String ENTER_TOPICS_MESSAGE = "topics.cannot.be.null.or.empty";
+    private static final String ENTER_USERS_CIFS_MESSAGE = "users.cifs.cannot.be.null.or.empty";
+    private static final String MISSING_LANGUAGE_MESSAGE = "missing.language.key.error";
 
     @Autowired
     public NotificationServiceImpl(NotificationRepository notificationRepository,
                                    TopicService topicService,
                                    ModelMapper modelMapper,
                                    UserRepository userRepository,
-                                   RabbitMQService rabbitMQService) {
+                                   RabbitMQService rabbitMQService,
+                                   MessageSourceReaderHelper messageSourceReaderHelper) {
 
         this.notificationRepository = notificationRepository;
         this.topicService = topicService;
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.rabbitMQService = rabbitMQService;
+        this.messageSourceReaderHelper = messageSourceReaderHelper;
     }
 
 
@@ -48,6 +55,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void saveAndSendNotificationByTopics(PushNotificationDto pushNotificationDto,
                                                 Set<String> givenTopics) {
+        if(givenTopics == null || givenTopics.isEmpty()) {
+            var message = messageSourceReaderHelper.getMessage(ENTER_TOPICS_MESSAGE);
+            throw new WrongRequestBodyException(message);
+        }
+
         var notificationsWithLanguages = pushNotificationDto.getLangAndNotification();
         checkLanguagesKeys(notificationsWithLanguages);
 
@@ -83,6 +95,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void  sendNotificationByUsers(PushNotificationDto pushNotificationDto, Set<String> userCifs) {
+        if(userCifs == null || userCifs.isEmpty()) {
+            var message = messageSourceReaderHelper.getMessage(ENTER_USERS_CIFS_MESSAGE);
+            throw new WrongRequestBodyException(message);
+        }
+
         var notificationsWithLanguages = pushNotificationDto.getLangAndNotification();
         checkLanguagesKeys(notificationsWithLanguages);
 
@@ -148,9 +165,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void checkLanguagesKeys(Map<PlatformLanguages, NotificationDto> notificationsWithLanguages) {
+
         for (var lang : PlatformLanguages.values()) {
-            if(!notificationsWithLanguages.containsKey(lang))
-                throw new WrongRequestBodyException("Language " + lang + " is missing!");
+            if(!notificationsWithLanguages.containsKey(lang)) {
+                var message = messageSourceReaderHelper.getMessage(MISSING_LANGUAGE_MESSAGE);
+                throw new WrongRequestBodyException(message.concat(" " + lang.toString()));
+            }
         }
     }
+
 }

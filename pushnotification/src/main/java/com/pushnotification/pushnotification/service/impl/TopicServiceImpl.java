@@ -6,10 +6,12 @@ import com.pushnotification.pushnotification.dto.TopicFetchDto;
 import com.pushnotification.pushnotification.entity.TopicEntity;
 import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
 import com.pushnotification.pushnotification.exceptions.WrongRequestBodyException;
+import com.pushnotification.pushnotification.helpers.MessageSourceReaderHelper;
 import com.pushnotification.pushnotification.repository.TopicRepository;
 import com.pushnotification.pushnotification.service.TopicService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,10 +26,17 @@ public class TopicServiceImpl implements TopicService {
 
     private final TopicRepository topicRepository;
     private final ModelMapper modelMapper;
+    private final MessageSourceReaderHelper messageSourceReaderHelper;
 
-    public TopicServiceImpl(TopicRepository topicRepository, ModelMapper modelMapper) {
+    private static final String MISSING_LANGUAGE_MESSAGE = "missing.language.key.error";
+
+    @Autowired
+    public TopicServiceImpl(TopicRepository topicRepository,
+                            ModelMapper modelMapper,
+                            MessageSourceReaderHelper messageSourceReaderHelper) {
         this.topicRepository = topicRepository;
         this.modelMapper = modelMapper;
+        this.messageSourceReaderHelper = messageSourceReaderHelper;
     }
 
 
@@ -111,7 +120,8 @@ public class TopicServiceImpl implements TopicService {
     private void checkAllLanguagesKeys(TopicRequestDto topicRequestDto){
         for (var lang : PlatformLanguages.values()) {
             if(!topicRequestDto.getDescription().containsKey(lang))
-                throw new WrongRequestBodyException("Language " + lang + " is missing!");
+                throw new WrongRequestBodyException(messageSourceReaderHelper
+                        .getMessage(MISSING_LANGUAGE_MESSAGE).concat(" " + lang.toString()));
         }
     }
 

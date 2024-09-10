@@ -63,8 +63,6 @@ public class FCMServiceImpl implements FCMService {
 
             return response;
         } catch (Exception e) {
-            log.error(", Error occurred when sending notification to FCM: {}", e.getMessage());
-
             return null;
         }
     }

@@ -1,7 +1,6 @@
 package com.pushnotification.pushnotification.repository;
 
 
-import com.pushnotification.pushnotification.entity.NotificationEntity;
 import com.pushnotification.pushnotification.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -16,5 +15,4 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     boolean existsByCif(String cif);
     boolean existsByToken(String token);
-    boolean existsByUuid(String uuid);
 }

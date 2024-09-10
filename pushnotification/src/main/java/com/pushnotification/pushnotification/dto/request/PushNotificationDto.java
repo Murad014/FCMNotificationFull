@@ -3,13 +3,12 @@ package com.pushnotification.pushnotification.dto.request;
 import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.dto.NotificationDto;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +23,6 @@ public class PushNotificationDto {
 
 
     @Valid
-    @NotNull
+    @NotEmpty
     Map<PlatformLanguages, NotificationDto> langAndNotification = new HashMap<>();
 }

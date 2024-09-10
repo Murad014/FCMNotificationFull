@@ -8,6 +8,7 @@ import com.pushnotification.pushnotification.entity.TopicEntity;
 import com.pushnotification.pushnotification.entity.UserEntity;
 import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
 import com.pushnotification.pushnotification.exceptions.WrongRequestBodyException;
+import com.pushnotification.pushnotification.helpers.MessageSourceReaderHelper;
 import com.pushnotification.pushnotification.repository.NotificationRepository;
 import com.pushnotification.pushnotification.repository.UserRepository;
 import com.pushnotification.pushnotification.service.impl.NotificationServiceImpl;
@@ -40,10 +41,13 @@ public class NotificationServiceTest {
     private TopicService topicService;
     @Mock
     private RabbitMQService rabbitMQService;
+    @Mock
+    private MessageSourceReaderHelper messageSourceReaderHelper;
 
     @InjectMocks
     private NotificationServiceImpl notificationService;
 
+    private static final String MISSING_LANGUAGE_MESSAGE = "missing.language.key.error";
 
     @Test
     @DisplayName("Send Notification by topics Success")
@@ -153,6 +157,9 @@ public class NotificationServiceTest {
 
         Set<String> givenTopics = new HashSet<>();
         givenTopics.add("NEWS");
+
+        // When
+        when(messageSourceReaderHelper.getMessage(anyString())).thenReturn(MISSING_LANGUAGE_MESSAGE);
 
         // Assert
         assertThrows(WrongRequestBodyException.class, () ->

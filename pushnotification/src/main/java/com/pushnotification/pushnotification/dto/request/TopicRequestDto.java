@@ -31,5 +31,4 @@ public class TopicRequestDto {
     Map<PlatformLanguages, String> description;
 
 
-
 }
