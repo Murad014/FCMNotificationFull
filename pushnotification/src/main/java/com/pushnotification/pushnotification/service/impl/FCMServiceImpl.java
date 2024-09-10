@@ -45,8 +45,6 @@ public class FCMServiceImpl implements FCMService {
     }
 
 
-
-
     @Override
     public String sendNotificationToUserByToken(String token, NotificationDto notification) {
         try {

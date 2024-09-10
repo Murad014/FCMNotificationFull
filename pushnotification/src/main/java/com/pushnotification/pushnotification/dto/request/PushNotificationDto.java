@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,5 +25,5 @@ public class PushNotificationDto {
 
     @Valid
     @NotNull
-    Map<PlatformLanguages, NotificationDto> langAndNotification;
+    Map<PlatformLanguages, NotificationDto> langAndNotification = new HashMap<>();
 }
