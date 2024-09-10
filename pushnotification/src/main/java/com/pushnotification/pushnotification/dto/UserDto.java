@@ -25,7 +25,6 @@ public class UserDto {
             @UniqueCif
     String cif;
 
-
     @Valid
             @NotBlank
             @NotNull
@@ -35,8 +34,6 @@ public class UserDto {
     @Valid
             @NotNull(message = "{NotNull.platform}")
     Platform platform;
-
-    Set<String> topics;
 
     @Valid
             @NotNull(message = "{NotNull.platform_language}")

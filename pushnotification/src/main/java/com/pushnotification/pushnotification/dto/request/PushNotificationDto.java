@@ -25,4 +25,6 @@ public class PushNotificationDto {
     @Valid
     @NotEmpty
     Map<PlatformLanguages, NotificationDto> langAndNotification = new HashMap<>();
+
+
 }

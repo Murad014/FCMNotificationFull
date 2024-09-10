@@ -15,11 +15,9 @@ public class UserMapping {
         userDto.setCif(userDto.getCif());
         userDto.setToken(userEntity.getToken());
         userDto.setPlatform(userEntity.getPlatform());
-        userDto.setTopics(new HashSet<>());
+        //userDto.setTopics(new HashSet<>());
         userDto.setPlatformLanguage(userEntity.getPlatformLanguage());
 
-        if(userEntity.getTopics() != null)
-            userEntity.getTopics().forEach(topicEntity -> userDto.getTopics().add(topicEntity.getName()));
 
         return userDto;
     }
