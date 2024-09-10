@@ -1,6 +1,5 @@
 package com.pushnotification.pushnotification.service.impl;
 
-
 import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
 import com.pushnotification.pushnotification.entity.UserEntity;
@@ -48,7 +47,15 @@ public class UsersServiceImpl implements UserService {
         findByCif.setPlatformLanguage(userDto.getPlatformLanguage());
 
         var updated = userRepository.save(findByCif);
-        return modelMapper.map(updated, UserUpdateDto.class);
+        var dto = modelMapper.map(updated, UserUpdateDto.class);
+        dto.setTopics(
+                findByCif.getTopics()
+                        .stream()
+                        .map(topic -> topic.getName().substring(0, topic.getName().lastIndexOf('_')))
+                        .collect(Collectors.toSet())
+        );
+
+        return dto;
     }
 
     @Override
@@ -67,7 +74,7 @@ public class UsersServiceImpl implements UserService {
                 () -> new ResourceNotFoundException("User", "cif", cif)
         );
 
-        // Convert Topics Name
+        // Concat topicNames to user's device lang
         topics = topics
                 .stream()
                 .map(name -> name.toUpperCase()

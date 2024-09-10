@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -17,7 +19,6 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
-    private static final String MAIN_PATH = "/api/v1/users";
     private final UserService userService;
     private final GenerateResponseHelper generateResponseHelper;
 
@@ -33,7 +34,7 @@ public class UserController {
         UserDto createdUser = userService.createUser(userDto);
 
         return buildResponse(HttpStatus.CREATED, "user.created.message",
-                createdUser, MAIN_PATH);
+                createdUser);
     }
 
     @PutMapping("/{cif}")
@@ -42,7 +43,7 @@ public class UserController {
         UserUpdateDto updatedUser = userService.updateUser(cif, userDto);
 
         return buildResponse(HttpStatus.OK, "user.updated.message",
-                updatedUser, MAIN_PATH.concat("/").concat(cif));
+                updatedUser);
     }
 
     @PutMapping("/{cif}/topics")
@@ -51,12 +52,16 @@ public class UserController {
         userService.setTopicsByUserCif(cif, requestBody.get("topics"));
 
         return buildResponse(HttpStatus.OK, "user.topics.set.successfully",
-                null, MAIN_PATH.concat("/").concat(cif).concat("/topics"));
+                null);
     }
 
     private <D> ResponseEntity<ResponseDto<D>> buildResponse(HttpStatus status, String messageKey,
-                                                             D data, String path) {
-        var response = generateResponseHelper.generateResponse(status.value(), messageKey, data, path);
+                                                             D data) {
+        var location = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .build()
+                .toUri();
+        var response = generateResponseHelper.generateResponse(status.value(), messageKey, data, location.getPath());
         return new ResponseEntity<>(response, status);
     }
 }

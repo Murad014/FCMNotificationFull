@@ -20,7 +20,6 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@ToString(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SQLRestriction("is_active = true")
 public class UserEntity extends BaseEntity{

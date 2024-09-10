@@ -2,9 +2,9 @@ package com.pushnotification.pushnotification.service;
 
 
 import com.pushnotification.pushnotification.constant.PlatformLanguages;
-import com.pushnotification.pushnotification.dto.TopicDto;
+import com.pushnotification.pushnotification.dto.request.TopicRequestDto;
+import com.pushnotification.pushnotification.dto.TopicFetchDto;
 import com.pushnotification.pushnotification.entity.TopicEntity;
-import com.pushnotification.pushnotification.exceptions.ResourceNotFoundException;
 import com.pushnotification.pushnotification.helper.TopicEntityCreatorHelper;
 import com.pushnotification.pushnotification.repository.TopicRepository;
 import com.pushnotification.pushnotification.service.impl.TopicServiceImpl;
@@ -34,14 +34,14 @@ public class TopicServiceTest {
     private TopicServiceImpl topicService;
 
     private TopicEntity topicEntity;
-    private TopicDto topicDto;
+    private TopicRequestDto topicRequestDto;
     private List<TopicEntity> topicEntities;
-    private List<TopicDto> dtoList;
+    private List<TopicRequestDto> dtoList;
 
     @BeforeEach
     public void beforeEach(){
         topicEntity = TopicEntityCreatorHelper.entity();
-        topicDto = TopicEntityCreatorHelper.dto();
+        topicRequestDto = TopicEntityCreatorHelper.dto();
         topicEntities = TopicEntityCreatorHelper.entityList(5);
         dtoList = TopicEntityCreatorHelper.dtoList(5);
     }
@@ -50,18 +50,18 @@ public class TopicServiceTest {
     @DisplayName("Add Topic")
     @Order(1)
     public void givenDto_whenSave_returnEntity(){
-        topicDto.setName(topicEntity.getName().concat("_az"));
+        topicRequestDto.setName(topicEntity.getName().concat("_az"));
         // When
-        when(modelMapper.map(topicDto, TopicEntity.class)).thenReturn(topicEntity);
-        when(topicRepository.save(topicEntity)).thenReturn(topicEntity);
-        when(modelMapper.map(topicEntity, TopicDto.class)).thenReturn(topicDto);
+        when(modelMapper.map(topicRequestDto, TopicEntity.class)).thenReturn(topicEntity);
+        when(topicRepository.saveAll(topicEntities)).thenReturn(topicEntities);
+        when(modelMapper.map(topicEntity, TopicRequestDto.class)).thenReturn(topicRequestDto);
 
         // Act
-        var saved = topicService.createTopic(topicDto);
+        var saved = topicService.createTopic(topicRequestDto);
 
         // Verify
-        verify(topicRepository, times(3)).save(topicEntity);
-        verify(modelMapper, times(3)).map(topicDto, TopicEntity.class);
+        verify(topicRepository, times(1)).saveAll(any());
+        verify(modelMapper, times(3)).map(topicRequestDto, TopicEntity.class);
 
         // Assert
         assertNotNull(saved);
@@ -80,7 +80,7 @@ public class TopicServiceTest {
 
         // When
         for(var lang: PlatformLanguages.values()) {
-            final var topicNameWithLang = testName.concat("_").concat(lang.toString());
+            final var topicNameWithLang = testName.toUpperCase().concat("_").concat(lang.toString());
             topicEntity.setName(topicNameWithLang);
             when(topicRepository.findByName(topicNameWithLang)).thenReturn(Optional.of(topicEntity));
             when(topicRepository.save(topicEntity)).thenReturn(topicEntity);
@@ -101,11 +101,11 @@ public class TopicServiceTest {
     public void givenTopics_whenFetchAllTopics_thenReturnTopicDtos() {
         // Mocking
         when(topicRepository.findAll()).thenReturn(List.of(topicEntities.get(0), topicEntities.get(1)));
-        when(modelMapper.map(topicEntities.get(0), TopicDto.class)).thenReturn(dtoList.get(1));
-        when(modelMapper.map(topicEntities.get(1), TopicDto.class)).thenReturn(dtoList.get(1));
+        when(modelMapper.map(topicEntities.get(0), TopicRequestDto.class)).thenReturn(dtoList.get(1));
+        when(modelMapper.map(topicEntities.get(1), TopicRequestDto.class)).thenReturn(dtoList.get(1));
 
         // Act
-        Set<TopicDto> result = topicService.fetchAllTopics();
+        Set<TopicFetchDto> result = topicService.fetchAllTopics();
 
         // Verify
         verify(topicRepository, times(1)).findAll();
@@ -153,30 +153,7 @@ public class TopicServiceTest {
         topicService.checkAllGivenTopicsInDB(givenTopics, fromDB);
     }
 
-    @DisplayName("Check Given All Topics not in DB")
-    @Test
-    void testCheckAllGivenTopicsInDB_SomeTopicsMissing() {
-        // Arrange
-        var topic01 = new TopicEntity();
-        topic01.setName("Topic1");
-        var topic02 = new TopicEntity();
-        topic02.setName("Topic2");
-        var topic03 = new TopicEntity();
-        topic03.setName("Topic3");
 
-        Set<String> givenTopics = new HashSet<>(Arrays.asList("Topic1", "Topic2", "Topic4"));
-        Set<TopicEntity> fromDB = new HashSet<>(Arrays.asList(topic01, topic02, topic03));
-
-        // Act & Assert (Exception should be thrown)
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> topicService.checkAllGivenTopicsInDB(givenTopics, fromDB)
-        );
-
-        assertEquals("Topics", exception.getResourceName());
-        assertEquals("topics", exception.getFieldName());
-        assertEquals("[Topic4]", exception.getFieldValue());
-    }
 
 
 

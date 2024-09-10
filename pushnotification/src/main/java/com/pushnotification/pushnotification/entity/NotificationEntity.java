@@ -48,13 +48,6 @@ public class NotificationEntity extends BaseEntity{
 
     @ManyToMany
     @JoinTable(
-            name = "notifications_topics",
-            joinColumns = @JoinColumn(name = "notification_id"),
-            inverseJoinColumns = @JoinColumn(name = "topic_id"))
-    Set<TopicEntity> topics = new HashSet<>();
-
-    @ManyToMany
-    @JoinTable(
             name = "notifications_users",
             joinColumns = @JoinColumn(name = "notification_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))

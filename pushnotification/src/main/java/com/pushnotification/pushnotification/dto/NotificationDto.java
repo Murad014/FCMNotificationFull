@@ -2,6 +2,9 @@ package com.pushnotification.pushnotification.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,12 +17,13 @@ import lombok.experimental.FieldDefaults;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ToString
 public class NotificationDto {
-    Long id;
+    @Valid
+    @NotNull(message = "{notification.title.input.error}")
+    @NotEmpty(message = "{notification.title.input.error}")
     String title;
+
     String body;
     String imageUrl;
     String iconUrl;
     String subtitle;
-    boolean sentToMq;
-    boolean sentToFcm;
 }

@@ -1,6 +1,8 @@
 package com.pushnotification.pushnotification.dto;
 
 import com.pushnotification.pushnotification.config.MessageConfig;
+import com.pushnotification.pushnotification.constant.PlatformLanguages;
+import com.pushnotification.pushnotification.dto.request.TopicRequestDto;
 import com.pushnotification.pushnotification.repository.TopicRepository;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -11,13 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @DisplayName("TopicDto Validation Test")
-public class TopicDtoTest {
+public class TopicRequestDtoTest {
     @Autowired
     private final Validator validator;
 
@@ -27,7 +32,7 @@ public class TopicDtoTest {
     @Autowired
     private TopicRepository userRepository;
 
-    public TopicDtoTest() {
+    public TopicRequestDtoTest() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         this.validator = factory.getValidator();
     }
@@ -36,12 +41,15 @@ public class TopicDtoTest {
     @DisplayName("Test Valid TopicDto")
     public void testValidTopicDto() {
         // Arrange
-        TopicDto topicDto = new TopicDto();
-        topicDto.setName("test");
-        topicDto.setDescription("test description");
+        Map<PlatformLanguages, String> hashMap = new HashMap<>();
+        hashMap.put(PlatformLanguages.AZ, "Desc");
+
+        TopicRequestDto topicRequestDto = new TopicRequestDto();
+        topicRequestDto.setName("test");
+        topicRequestDto.setDescription(hashMap);
 
         // Act
-        var violations = validator.validate(topicDto);
+        var violations = validator.validate(topicRequestDto);
 
         // Assert
         assertTrue(violations.isEmpty(), "UserDto should be valid");

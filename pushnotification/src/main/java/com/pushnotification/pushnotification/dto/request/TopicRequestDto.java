@@ -1,6 +1,7 @@
-package com.pushnotification.pushnotification.dto;
+package com.pushnotification.pushnotification.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.customvalidations.UniqueTopicName;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -11,12 +12,14 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ToString
-public class TopicDto {
+public class TopicRequestDto {
     @Valid
     @NotNull(message="Topic name cannot be null")
     @NotBlank(message="Topic name cannot be empty")
@@ -25,6 +28,7 @@ public class TopicDto {
 
     @Valid
     @NotNull(message="Topic description cannot be null")
-    @NotBlank(message="Topic description cannot be empty")
-    String description;
+    Map<PlatformLanguages, String> description;
+
+
 }
