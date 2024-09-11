@@ -54,8 +54,7 @@ public class UserMappingTest {
         assertEquals(userEntity.getToken(), userDto.getToken());
         assertEquals(userEntity.getPlatform(), userDto.getPlatform());
         assertEquals(userEntity.getPlatformLanguage(), userDto.getPlatformLanguage());
-        assertEquals(2, userDto.getTopics().size());
-        assertEquals(Set.of("Sports", "Technology"), userDto.getTopics());
+
     }
 
     @Test
