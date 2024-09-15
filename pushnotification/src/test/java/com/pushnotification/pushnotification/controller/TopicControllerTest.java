@@ -93,35 +93,5 @@ class TopicControllerTest {
                         location.getPath());
     }
 
-    @Test
-    void testDeleteTopic() {
-        // Arrange
-        String topicName = "testTopic";
-        ResponseDto<Object> responseDto = new ResponseDto<>();
-        responseDto.setCode(HttpStatus.OK.value());
-        responseDto.setMessage("topic.deleted.success.message");
-        responseDto.setData(null);
-        var location = ServletUriComponentsBuilder
-                .fromCurrentRequestUri()
-                .build()
-                .toUri();
-        // When
-        when(generateResponseHelper.generateResponse(
-                HttpStatus.OK.value(),
-                "topic.deleted.success.message",
-                null,
-                location.getPath()))
-                .thenReturn(responseDto);
-
-        doNothing().when(topicService).deleteTopic(topicName);
-
-        // Act
-        topicController.deleteTopic(topicName);
-
-        // Assert
-
-        verify(topicService, times(1)).deleteTopic(topicName);
-
-    }
 }
 

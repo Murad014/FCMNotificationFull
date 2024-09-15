@@ -2,6 +2,7 @@ package com.pushnotification.pushnotification.dto.request;
 
 import com.pushnotification.pushnotification.constant.PlatformLanguages;
 import com.pushnotification.pushnotification.dto.NotificationDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
@@ -24,7 +25,7 @@ public class PushNotificationDto {
 
     @Valid
     @NotEmpty
+    @Schema(description = "Map of languages to notifications")
     Map<PlatformLanguages, NotificationDto> langAndNotification = new HashMap<>();
-
 
 }

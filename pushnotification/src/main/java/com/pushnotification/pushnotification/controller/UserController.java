@@ -3,6 +3,7 @@ package com.pushnotification.pushnotification.controller;
 import com.pushnotification.pushnotification.dto.ResponseDto;
 import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
+import com.pushnotification.pushnotification.dto.request.SetTopicDto;
 import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
 import com.pushnotification.pushnotification.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,15 +19,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.Map;
-import java.util.Set;
-
 @RestController
 @RequestMapping("/api/v1/users")
 @Tag(name="Users Endpoints", description = "Add user, Update user by cif, Set Topics by User cif")
 public class UserController {
     private final UserService userService;
     private final GenerateResponseHelper generateResponseHelper;
+
+    private final static String USER_TOPICS_SET_SUCCESSFULLY = "user.topics.set.successfully";
+    private final static String USER_UPDATED_MESSAGE = "user.updated.message";
+    private final static String USER_CREATED_MESSAGE = "user.created.message";
 
 
     @Autowired
@@ -35,7 +37,7 @@ public class UserController {
         this.generateResponseHelper = generateResponseHelper;
     }
 
-    @Operation(summary = "Create a new user", description = "Creates a new user in the system.")
+    @Operation(summary = "Create a new user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "User successfully created",
                     content = @Content(schema = @Schema(implementation = ResponseDto.class)))
@@ -44,7 +46,7 @@ public class UserController {
     public ResponseEntity<ResponseDto<UserDto>> createUser(@Valid @RequestBody UserDto userDto) {
         UserDto createdUser = userService.createUser(userDto);
 
-        return buildResponse(HttpStatus.CREATED, "user.created.message",
+        return buildResponse(HttpStatus.CREATED, USER_CREATED_MESSAGE,
                 createdUser);
     }
 
@@ -60,7 +62,7 @@ public class UserController {
                                                                  @Valid @RequestBody UserUpdateDto userDto) {
         UserUpdateDto updatedUser = userService.updateUser(cif, userDto);
 
-        return buildResponse(HttpStatus.OK, "user.updated.message",
+        return buildResponse(HttpStatus.OK, USER_UPDATED_MESSAGE,
                 updatedUser);
     }
 
@@ -73,10 +75,10 @@ public class UserController {
     })
     @PutMapping("/{cif}/topics")
     public ResponseEntity<ResponseDto<UserUpdateDto>> setTopicsByUserCif(@PathVariable("cif") String cif,
-                                                                @RequestBody Map<String, Set<String>> requestBody) {
-        userService.setTopicsByUserCif(cif, requestBody.get("topics"));
+                                                                         @RequestBody SetTopicDto requestBody) {
+        userService.setTopicsByUserCif(cif, requestBody.getTopicNames());
 
-        return buildResponse(HttpStatus.OK, "user.topics.set.successfully",
+        return buildResponse(HttpStatus.OK, USER_TOPICS_SET_SUCCESSFULLY,
                 null);
     }
 
@@ -86,6 +88,7 @@ public class UserController {
                 .fromCurrentRequestUri()
                 .build()
                 .toUri();
+
         var response = generateResponseHelper.generateResponse(status.value(), messageKey, data, location.getPath());
         return new ResponseEntity<>(response, status);
     }

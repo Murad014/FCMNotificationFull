@@ -4,6 +4,7 @@ package com.pushnotification.pushnotification.controller;
 import com.pushnotification.pushnotification.dto.ResponseDto;
 import com.pushnotification.pushnotification.dto.UserDto;
 import com.pushnotification.pushnotification.dto.UserUpdateDto;
+import com.pushnotification.pushnotification.dto.request.SetTopicDto;
 import com.pushnotification.pushnotification.helper.UserDtoCreatorHelper;
 import com.pushnotification.pushnotification.helpers.GenerateResponseHelper;
 import com.pushnotification.pushnotification.service.UserService;
@@ -107,8 +108,8 @@ class UserControllerTest {
         mockResponseDto.setData(null);
         mockResponseDto.setPath("/api/v1/users/1212314/topics");
 
-        Map<String, Set<String>> controllerInput = new HashMap<>();
-        controllerInput.put("topics", topics);
+        var setTopicDto = new SetTopicDto();
+        setTopicDto.setTopicNames(topics);
         var location = ServletUriComponentsBuilder
                 .fromCurrentRequestUri()
                 .build()
@@ -119,7 +120,7 @@ class UserControllerTest {
                 .thenReturn(mockResponseDto);
 
         // Act
-        var response = userController.setTopicsByUserCif(updatedCIF, controllerInput);
+        var response = userController.setTopicsByUserCif(updatedCIF, setTopicDto);
 
         // Verify
         verify(userService, times(1)).setTopicsByUserCif(updatedCIF, topics);

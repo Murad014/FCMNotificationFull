@@ -20,14 +20,15 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ToString
 public class TopicRequestDto {
+
     @Valid
-    @NotNull(message="Topic name cannot be null")
-    @NotBlank(message="Topic name cannot be empty")
+    @NotNull(message="{enter.topic.name}")
+    @NotBlank(message="{enter.topic.name}")
     @UniqueTopicName(message="{topic.exists}")
     String name;
 
     @Valid
-    @NotNull(message="Topic description cannot be null")
+    @NotNull(message="{enter.topic.description}")
     Map<PlatformLanguages, String> description;
 
 

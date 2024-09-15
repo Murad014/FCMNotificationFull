@@ -13,17 +13,10 @@ import org.springframework.context.annotation.Configuration;
                 description = "This is FCM Push Notification documentation",
                 contact = @io.swagger.v3.oas.annotations.info.Contact(
                         name = "Murad Guliyev",
-                        email = "quliyev.murad@yahoo.com",
-                        url = ""
+                        email = "quliyev.murad@yahoo.com"
                 )
         )
 )
 public class SwaggerConfig {
-//    @Bean
-//    public GroupedOpenApi publicApi() {
-//        return GroupedOpenApi.builder()
-//                .group("springdoc-openapi")
-//                .pathsToMatch("/**")
-//                .build();
-//    }
+
 }

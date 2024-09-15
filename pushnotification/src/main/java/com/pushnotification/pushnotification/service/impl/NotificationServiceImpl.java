@@ -63,12 +63,12 @@ public class NotificationServiceImpl implements NotificationService {
         var notificationsWithLanguages = pushNotificationDto.getLangAndNotification();
         checkLanguagesKeys(notificationsWithLanguages);
 
-        Set<TopicEntity> allTopicsFromDB = checkAllGivenTopicsExistInDBThenReturnTopicsInDB(givenTopics);
+        Set<TopicEntity> allGivenTopicsTopicsFromDB = checkAllGivenTopicsExistInDBThenReturnTopicsInDB(givenTopics);
 
         // Save
         List<NotificationEntity> bulkSave = new ArrayList<>();
         for(var language: PlatformLanguages.values()) {
-            Set<String> getTopicsForSpecLanguage = allTopicsFromDB.stream()
+            Set<String> getTopicsForSpecLanguage = allGivenTopicsTopicsFromDB.stream()
                     .filter(topic -> topic.getName().endsWith("_" + language))
                     .collect(Collectors.toSet())
                     .stream()
@@ -82,6 +82,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .map(notificationsWithLanguages.get(language), NotificationEntity.class);
 
             notificationEntity.setUsers(new HashSet<>(usersForGivenTopics));
+            notificationEntity.setTopics(new HashSet<>(allGivenTopicsTopicsFromDB));
             notificationEntity.setSentToMq(true);
 
             bulkSave.add(notificationEntity);
